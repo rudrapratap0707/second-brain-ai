@@ -31,9 +31,15 @@ function Assistant() {
       const data = await getChatById(id)
 
       setActiveChat(data.chat)
-      setMessages([...(data.chat.messages || [])])
 
-      localStorage.setItem("activeChatId", id)
+      setMessages([
+        ...(data.chat.messages || []),
+      ])
+
+      localStorage.setItem(
+        "activeChatId",
+        id
+      )
     } catch (error) {
       console.log(error)
     }
@@ -44,9 +50,13 @@ function Assistant() {
       const data = await createChat()
 
       setActiveChat(data.chat)
+
       setMessages([])
 
-      localStorage.setItem("activeChatId", data.chat._id)
+      localStorage.setItem(
+        "activeChatId",
+        data.chat._id
+      )
 
       await loadChats()
     } catch (error) {
@@ -54,7 +64,10 @@ function Assistant() {
     }
   }
 
-  const handleDeleteChat = async (id, e) => {
+  const handleDeleteChat = async (
+    id,
+    e
+  ) => {
     if (e) {
       e.stopPropagation()
     }
@@ -65,7 +78,10 @@ function Assistant() {
       if (activeChat?._id === id) {
         setActiveChat(null)
         setMessages([])
-        localStorage.removeItem("activeChatId")
+
+        localStorage.removeItem(
+          "activeChatId"
+        )
       }
 
       await loadChats()
@@ -75,7 +91,8 @@ function Assistant() {
   }
 
   const handleSend = async () => {
-    if (!message.trim() || loading) return
+    if (!message.trim() || loading)
+      return
 
     let currentChat = activeChat
 
@@ -86,7 +103,11 @@ function Assistant() {
         currentChat = data.chat
 
         setActiveChat(data.chat)
-        localStorage.setItem("activeChatId", data.chat._id)
+
+        localStorage.setItem(
+          "activeChatId",
+          data.chat._id
+        )
 
         await loadChats()
       }
@@ -98,17 +119,26 @@ function Assistant() {
 
       const currentMessage = message
 
-      setMessages((prev) => [...prev, userMessage])
+      setMessages((prev) => [
+        ...prev,
+        userMessage,
+      ])
+
       setMessage("")
+
       setLoading(true)
 
-      const data = await sendMessageToChat(
-        currentChat._id,
-        currentMessage
-      )
+      const data =
+        await sendMessageToChat(
+          currentChat._id,
+          currentMessage
+        )
 
       setActiveChat(data.chat)
-      setMessages([...(data.chat.messages || [])])
+
+      setMessages([
+        ...(data.chat.messages || []),
+      ])
 
       await loadChats()
     } catch (error) {
@@ -127,45 +157,51 @@ function Assistant() {
   }
 
   useEffect(() => {
-    const initializeChats = async () => {
-      try {
-        const data = await getChats()
-        const allChats = data.chats || []
+    const initializeChats =
+      async () => {
+        try {
+          const data = await getChats()
 
-        setChats(allChats)
+          const allChats =
+            data.chats || []
 
-        const savedChatId = localStorage.getItem("activeChatId")
+          setChats(allChats)
 
-        if (savedChatId) {
-          await openChat(savedChatId)
+          const savedChatId =
+            localStorage.getItem(
+              "activeChatId"
+            )
+
+          if (savedChatId) {
+            await openChat(savedChatId)
+          }
+        } catch (error) {
+          console.log(error)
         }
-      } catch (error) {
-        console.log(error)
       }
-    }
 
     initializeChats()
   }, [])
 
   return (
     <DashboardLayout>
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-        {/* CHAT HISTORY SIDEBAR */}
-        <div className="bg-white/10 border border-white/10 rounded-3xl p-5 h-[680px] overflow-y-auto">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[320px_1fr]">
+        {/* CHAT HISTORY */}
+        <div className="responsive-card border border-white/10 bg-white/10 p-4 md:p-5">
           <button
             onClick={handleNewChat}
-            className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-2xl mb-5"
+            className="mb-5 w-full rounded-2xl bg-cyan-500 py-3 font-bold text-black transition hover:bg-cyan-400"
           >
             + New Chat
           </button>
 
-          <h2 className="text-xl font-bold mb-4">
+          <h2 className="mb-4 text-xl font-bold md:text-2xl">
             Chat History
           </h2>
 
-          <div className="space-y-3">
+          <div className="max-h-[500px] space-y-3 overflow-y-auto pr-1 xl:max-h-[700px]">
             {chats.length === 0 && (
-              <p className="text-slate-400 text-sm">
+              <p className="text-sm text-slate-400">
                 No chats yet.
               </p>
             )}
@@ -173,20 +209,29 @@ function Assistant() {
             {chats.map((chat) => (
               <div
                 key={chat._id}
-                onClick={() => openChat(chat._id)}
-                className={`p-3 rounded-2xl cursor-pointer border transition ${
-                  activeChat?._id === chat._id
-                    ? "bg-cyan-500 text-black border-cyan-400"
-                    : "bg-white/10 text-white border-white/10 hover:bg-white/20"
+                onClick={() =>
+                  openChat(chat._id)
+                }
+                className={`cursor-pointer rounded-2xl border p-3 transition ${
+                  activeChat?._id ===
+                  chat._id
+                    ? "border-cyan-400 bg-cyan-500 text-black"
+                    : "border-white/10 bg-white/10 text-white hover:bg-white/20"
                 }`}
               >
-                <div className="font-medium truncate">
-                  {chat.title || "New Chat"}
+                <div className="truncate font-medium">
+                  {chat.title ||
+                    "New Chat"}
                 </div>
 
                 <button
-                  onClick={(e) => handleDeleteChat(chat._id, e)}
-                  className="text-xs mt-2 text-red-300 hover:text-red-200"
+                  onClick={(e) =>
+                    handleDeleteChat(
+                      chat._id,
+                      e
+                    )
+                  }
+                  className="mt-2 text-xs text-red-300 hover:text-red-200"
                 >
                   Delete
                 </button>
@@ -195,128 +240,94 @@ function Assistant() {
           </div>
         </div>
 
-        {/* MAIN CHAT AREA */}
-        <div>
-          <h1 className="text-4xl font-bold">
-            AI Assistant
-          </h1>
+        {/* MAIN CHAT */}
+        <div className="flex min-h-[70vh] flex-col">
+          <div className="mb-6">
+            <h1 className="responsive-title">
+              AI Assistant
+            </h1>
 
-          <p className="text-slate-400 mt-3">
-            Ask questions about your notes, reminders, mood, and productivity.
-          </p>
+            <p className="mt-3 max-w-3xl text-sm text-slate-400 md:text-base">
+              Ask questions about your
+              notes, reminders, mood,
+              productivity, exams, and
+              study goals.
+            </p>
+          </div>
 
-          <div className="mt-10 bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl min-h-[600px] flex flex-col">
-            <div className="flex-1 border border-dashed border-white/20 rounded-2xl p-6 text-slate-300 overflow-y-auto space-y-4">
+          <div className="flex flex-1 flex-col rounded-[28px] border border-white/10 bg-white/10 p-3 backdrop-blur-xl md:p-5">
+            {/* MESSAGES */}
+            <div className="flex-1 space-y-4 overflow-y-auto rounded-3xl border border-dashed border-white/20 p-3 text-slate-300 md:p-5">
               {messages.length === 0 && (
-                <p className="text-slate-400">
-                  AI conversation will appear here.
-                </p>
+                <div className="flex min-h-[300px] items-center justify-center text-center">
+                  <p className="max-w-md text-sm text-slate-400 md:text-base">
+                    Your AI conversation
+                    will appear here.
+                  </p>
+                </div>
               )}
 
-              {messages.map((msg, index) => (
-                <div
-                  key={`${msg.role}-${index}`}
-                  className={`p-4 rounded-2xl max-w-[80%] overflow-x-auto ${
-                    msg.role === "user"
-                      ? "bg-cyan-500 text-black ml-auto"
-                      : "bg-white/10 text-white"
-                  }`}
-                >
-                  {msg.role === "ai" ? (
-                    <div className="prose prose-invert max-w-none prose-p:my-2 prose-li:my-1 prose-headings:text-white prose-strong:text-white">
-                      <ReactMarkdown
-                        components={{
-                          h1: ({ children }) => (
-                            <h1 className="text-3xl font-bold mb-4 text-white">
-                              {children}
-                            </h1>
-                          ),
-
-                          h2: ({ children }) => (
-                            <h2 className="text-2xl font-bold mb-3 text-white">
-                              {children}
-                            </h2>
-                          ),
-
-                          h3: ({ children }) => (
-                            <h3 className="text-xl font-bold mb-2 text-white">
-                              {children}
-                            </h3>
-                          ),
-
-                          p: ({ children }) => (
-                            <p className="mb-3 leading-7 text-slate-200">
-                              {children}
-                            </p>
-                          ),
-
-                          ul: ({ children }) => (
-                            <ul className="list-disc pl-6 space-y-2 mb-4 text-slate-200">
-                              {children}
-                            </ul>
-                          ),
-
-                          ol: ({ children }) => (
-                            <ol className="list-decimal pl-6 space-y-2 mb-4 text-slate-200">
-                              {children}
-                            </ol>
-                          ),
-
-                          li: ({ children }) => (
-                            <li className="leading-7">
-                              {children}
-                            </li>
-                          ),
-
-                          strong: ({ children }) => (
-                            <strong className="font-bold text-white">
-                              {children}
-                            </strong>
-                          ),
-
-                          code: ({ children }) => (
-                            <code className="bg-black/30 px-2 py-1 rounded text-cyan-300">
-                              {children}
-                            </code>
-                          ),
-                        }}
-                      >
+              {messages.map(
+                (msg, index) => (
+                  <div
+                    key={`${msg.role}-${index}`}
+                    className={`w-fit max-w-full overflow-hidden rounded-3xl px-4 py-3 text-sm md:max-w-[85%] md:px-5 md:py-4 md:text-base ${
+                      msg.role === "user"
+                        ? "ml-auto bg-cyan-500 text-black"
+                        : "bg-white/10 text-white"
+                    }`}
+                  >
+                    {msg.role === "ai" ? (
+                      <div className="prose prose-invert max-w-none break-words prose-p:my-2 prose-pre:overflow-x-auto prose-code:break-words">
+                        <ReactMarkdown>
+                          {msg.text}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div className="break-words whitespace-pre-wrap">
                         {msg.text}
-                      </ReactMarkdown>
-                    </div>
-                  ) : (
-                    msg.text
-                  )}
-                </div>
-              ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
 
               {loading && (
-                <p className="text-cyan-400">
+                <p className="text-sm text-cyan-400 md:text-base">
                   AI is thinking...
                 </p>
               )}
             </div>
 
-            <div className="mt-5 flex gap-4">
+            {/* INPUT */}
+            <div className="mt-4 flex flex-col gap-3 md:flex-row">
               <input
                 type="text"
                 placeholder="Ask your Second Brain..."
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) =>
+                  setMessage(
+                    e.target.value
+                  )
+                }
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (
+                    e.key === "Enter"
+                  ) {
                     handleSend()
                   }
                 }}
-                className="flex-1 bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none text-white placeholder:text-slate-500"
+                className="min-h-[54px] w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 md:text-base"
               />
 
               <button
                 onClick={handleSend}
                 disabled={loading}
-                className="px-8 py-3 rounded-2xl bg-cyan-500 text-black font-semibold disabled:opacity-60"
+                className="min-h-[54px] rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-black transition hover:bg-cyan-400 disabled:opacity-60 md:px-8 md:text-base"
               >
-                {loading ? "Sending..." : "Send"}
+                {loading
+                  ? "Sending..."
+                  : "Send"}
               </button>
             </div>
           </div>
