@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Star,
   FileText,
-  CalendarDays,
   Link as LinkIcon,
   Search,
   BadgeCheck,
@@ -26,7 +25,9 @@ import {
   deleteStudentDocument,
 } from "../services/api"
 
-const BACKEND_URL = "http://localhost:5000"
+const BACKEND_URL =
+  import.meta.env.VITE_API_URL?.replace("/api", "") ||
+  "http://localhost:5000"
 
 const categories = [
   "Admit Card",
@@ -42,12 +43,7 @@ const categories = [
   "Other",
 ]
 
-const documentTypes = [
-  "PDF",
-  "Image",
-  "Document",
-  "Other",
-]
+const documentTypes = ["PDF", "Image", "Document", "Other"]
 
 function DigitalDocumentVault() {
   const [documents, setDocuments] = useState([])
@@ -92,8 +88,13 @@ function DigitalDocumentVault() {
   const filteredDocuments = useMemo(() => {
     return documents.filter((doc) => {
       const text = `${doc.title || ""} ${doc.category || ""} ${(doc.tags || []).join(" ")}`
-      const matchesSearch = text.toLowerCase().includes(search.toLowerCase())
-      const matchesFilter = filter === "All" || doc.category === filter
+      const matchesSearch = text
+        .toLowerCase()
+        .includes(search.toLowerCase())
+
+      const matchesFilter =
+        filter === "All" || doc.category === filter
+
       return matchesSearch && matchesFilter
     })
   }, [documents, search, filter])
@@ -116,7 +117,6 @@ function DigitalDocumentVault() {
 
   const detectDocumentType = (file) => {
     if (!file) return "Other"
-
     if (file.type === "application/pdf") return "PDF"
     if (file.type.startsWith("image/")) return "Image"
 
@@ -144,9 +144,28 @@ function DigitalDocumentVault() {
     }))
   }
 
+  const resetForm = () => {
+    setForm({
+      title: "",
+      category: "Other",
+      documentType: "PDF",
+      fileName: "",
+      fileSize: 0,
+      issuingAuthority: "",
+      documentDate: "",
+      expiryDate: "",
+      tagsText: "",
+      isImportant: false,
+      isVerified: false,
+      notes: "",
+    })
+
+    setSelectedFile(null)
+  }
+
   const handleCreateDocument = async () => {
     try {
-      if (!form.title) {
+      if (!form.title.trim()) {
         return alert("Document title required")
       }
 
@@ -174,22 +193,7 @@ function DigitalDocumentVault() {
 
       await createStudentDocument(formData)
 
-      setForm({
-        title: "",
-        category: "Other",
-        documentType: "PDF",
-        fileName: "",
-        fileSize: 0,
-        issuingAuthority: "",
-        documentDate: "",
-        expiryDate: "",
-        tagsText: "",
-        isImportant: false,
-        isVerified: false,
-        notes: "",
-      })
-
-      setSelectedFile(null)
+      resetForm()
       fetchDocuments()
     } catch (error) {
       console.log(error)
@@ -234,35 +238,35 @@ function DigitalDocumentVault() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/10 p-8 backdrop-blur-xl">
-          <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl" />
+      <div className="page-shell mx-auto max-w-7xl space-y-5 md:space-y-8">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
+          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-violet-500/20 blur-3xl md:h-72 md:w-72" />
+          <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-cyan-500/20 blur-3xl md:h-72 md:w-72" />
 
-          <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-violet-500 text-white">
-                <FolderOpen size={42} />
+          <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-violet-500 text-white md:h-16 md:w-16">
+                <FolderOpen size={30} />
               </div>
 
               <div>
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-400/10 px-4 py-2 text-sm font-semibold text-violet-200">
-                  <ShieldCheck size={16} />
-                  Secure Student Vault
+                <div className="mb-3 inline-flex max-w-full items-center gap-2 rounded-full border border-violet-400/30 bg-violet-400/10 px-3 py-2 text-xs font-semibold text-violet-200 md:px-4 md:text-sm">
+                  <ShieldCheck size={16} className="shrink-0" />
+                  <span>Secure Student Vault</span>
                 </div>
 
-                <h1 className="text-4xl font-bold text-white md:text-5xl">
+                <h1 className="text-2xl font-extrabold leading-tight text-white sm:text-3xl md:text-5xl">
                   Digital Document Vault
                 </h1>
 
-                <p className="mt-4 max-w-3xl text-slate-300">
-                  Upload and organize academic documents, certificates, admit
-                  cards, marksheets, syllabus, receipts, and student files.
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300 md:text-base">
+                  Upload and organize marksheets, admit cards, certificates,
+                  syllabus, receipts, ID cards, and academic files.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-[420px]">
               <Metric label="Docs" value={analytics.total} />
               <Metric label="Important" value={analytics.important} />
               <Metric label="Verified" value={analytics.verified} />
@@ -271,45 +275,30 @@ function DigitalDocumentVault() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-          <section className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-            <h2 className="mb-6 text-2xl font-bold text-white">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+          <section className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-6">
+            <h2 className="mb-5 text-xl font-bold text-white md:text-2xl">
               Upload Document
             </h2>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <Input
                 label="Document Title"
                 value={form.title}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    title: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, title: v })}
               />
 
               <Select
                 label="Category"
                 value={form.category}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    category: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, category: v })}
                 options={categories}
               />
 
               <Select
                 label="Document Type"
                 value={form.documentType}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    documentType: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, documentType: v })}
                 options={documentTypes}
               />
 
@@ -329,29 +318,31 @@ function DigitalDocumentVault() {
                 }
               />
 
-              <Input
-                type="date"
-                label="Document Date"
-                value={form.documentDate}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    documentDate: v,
-                  })
-                }
-              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                <Input
+                  type="date"
+                  label="Document Date"
+                  value={form.documentDate}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      documentDate: v,
+                    })
+                  }
+                />
 
-              <Input
-                type="date"
-                label="Expiry Date"
-                value={form.expiryDate}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    expiryDate: v,
-                  })
-                }
-              />
+                <Input
+                  type="date"
+                  label="Expiry Date"
+                  value={form.expiryDate}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      expiryDate: v,
+                    })
+                  }
+                />
+              </div>
 
               <Textarea
                 label="Tags"
@@ -362,7 +353,7 @@ function DigitalDocumentVault() {
                     tagsText: v,
                   })
                 }
-                placeholder="Comma separated: semester, BCA, exam"
+                placeholder="semester, BCA, exam"
               />
 
               <Textarea
@@ -374,67 +365,70 @@ function DigitalDocumentVault() {
                     notes: v,
                   })
                 }
+                placeholder="Optional document notes"
               />
 
-              <Toggle
-                label="Mark Important"
-                checked={form.isImportant}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    isImportant: v,
-                  })
-                }
-              />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <Toggle
+                  label="Mark Important"
+                  checked={form.isImportant}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      isImportant: v,
+                    })
+                  }
+                />
 
-              <Toggle
-                label="Mark Verified"
-                checked={form.isVerified}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    isVerified: v,
-                  })
-                }
-              />
+                <Toggle
+                  label="Mark Verified"
+                  checked={form.isVerified}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      isVerified: v,
+                    })
+                  }
+                />
+              </div>
 
               <button
                 type="button"
                 onClick={handleCreateDocument}
                 disabled={saving}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-500 px-5 py-4 font-bold text-white disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-400 disabled:opacity-60 md:py-4 md:text-base"
               >
                 {saving ? (
-                  <Loader2 className="animate-spin" size={20} />
+                  <Loader2 className="animate-spin" size={18} />
                 ) : (
-                  <Plus size={20} />
+                  <Plus size={18} />
                 )}
-                Upload Document
+                {saving ? "Uploading..." : "Upload Document"}
               </button>
             </div>
           </section>
 
-          <section className="space-y-6 xl:col-span-2">
-            <div className="rounded-[32px] border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
+          <section className="space-y-5 xl:col-span-2">
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="relative md:col-span-2">
                   <Search
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
-                    size={20}
+                    size={18}
                   />
 
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search documents, categories, tags..."
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 py-4 pl-12 pr-4 text-white outline-none placeholder:text-slate-600"
+                    placeholder="Search documents..."
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-slate-600 md:py-4 md:text-base"
                   />
                 </div>
 
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-white outline-none"
+                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none md:py-4 md:text-base"
                 >
                   <option className="bg-slate-900">All</option>
 
@@ -451,25 +445,31 @@ function DigitalDocumentVault() {
               </div>
             </div>
 
-            <div className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">
-                  Vault Records
-                </h2>
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-6">
+              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-white md:text-2xl">
+                    Vault Records
+                  </h2>
 
-                <span className="rounded-2xl bg-white/10 px-4 py-2 text-sm text-slate-300">
-                  {filteredDocuments.length} Records
+                  <p className="mt-1 text-sm text-slate-400">
+                    {filteredDocuments.length} record(s) found
+                  </p>
+                </div>
+
+                <span className="w-fit rounded-2xl bg-white/10 px-4 py-2 text-xs text-slate-300 md:text-sm">
+                  {filter}
                 </span>
               </div>
 
               {loading ? (
                 <div className="flex justify-center py-16">
-                  <Loader2 className="animate-spin text-violet-300" size={42} />
+                  <Loader2 className="animate-spin text-violet-300" size={36} />
                 </div>
               ) : filteredDocuments.length === 0 ? (
                 <EmptyVault />
               ) : (
-                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   {filteredDocuments.map((doc) => (
                     <DocumentCard
                       key={doc._id}
@@ -494,31 +494,36 @@ function FilePicker({ selectedFile, onFileSelect }) {
     <label className="block">
       <span className="text-sm text-slate-400">Select File From Device</span>
 
-      <div className="mt-2 rounded-3xl border border-dashed border-violet-400/30 bg-violet-500/10 p-5">
+      <div className="mt-2 rounded-3xl border border-dashed border-violet-400/30 bg-violet-500/10 p-4 md:p-5">
         <div className="flex flex-col items-center justify-center text-center">
-          <UploadCloud size={42} className="text-violet-300" />
+          <UploadCloud size={36} className="text-violet-300" />
 
-          <p className="mt-3 font-semibold text-white">
+          <p className="mt-3 text-sm font-semibold text-white md:text-base">
             Upload PDF, Image, DOC, or DOCX
           </p>
 
-          <p className="mt-1 text-sm text-slate-400">Maximum size: 10 MB</p>
+          <p className="mt-1 text-xs text-slate-400 md:text-sm">
+            Maximum size: 10 MB
+          </p>
 
           <input
             type="file"
             accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
             onChange={(e) => onFileSelect(e.target.files?.[0])}
-            className="mt-5 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none"
+            className="mt-5 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none md:text-base"
           />
         </div>
 
         {selectedFile && (
           <div className="mt-4 rounded-2xl border border-green-400/20 bg-green-500/10 p-4">
-            <div className="flex items-center gap-3 text-green-200">
-              <FileCheck2 size={20} />
+            <div className="flex items-start gap-3 text-green-200">
+              <FileCheck2 size={20} className="mt-1 shrink-0" />
 
-              <div>
-                <p className="font-semibold">{selectedFile.name}</p>
+              <div className="min-w-0">
+                <p className="break-all text-sm font-semibold md:text-base">
+                  {selectedFile.name}
+                </p>
+
                 <p className="text-sm text-green-300">
                   {formatFileSize(selectedFile.size)}
                 </p>
@@ -537,20 +542,22 @@ function DocumentCard({ doc, onDelete, onImportant, onVerified }) {
     : `${BACKEND_URL}${doc.fileUrl || ""}`
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/20 p-6">
+    <article className="relative flex min-h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-black/20 p-4 md:p-5">
       <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-violet-500/10 blur-3xl" />
 
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-violet-500/20 text-violet-200">
-              <FileText size={28} />
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-500/20 text-violet-200 md:h-14 md:w-14">
+              <FileText size={24} />
             </div>
 
-            <div>
-              <h3 className="text-xl font-bold text-white">{doc.title}</h3>
+            <div className="min-w-0">
+              <h3 className="line-clamp-2 text-lg font-bold text-white md:text-xl">
+                {doc.title}
+              </h3>
 
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-xs text-slate-400 md:text-sm">
                 {doc.category} · {doc.documentType}
               </p>
             </div>
@@ -559,7 +566,7 @@ function DocumentCard({ doc, onDelete, onImportant, onVerified }) {
           <button
             type="button"
             onClick={() => onDelete(doc._id)}
-            className="rounded-2xl bg-red-500/20 p-3 text-red-300 hover:bg-red-500/30"
+            className="flex w-full items-center justify-center rounded-2xl bg-red-500/20 p-3 text-red-300 transition hover:bg-red-500/30 sm:w-auto"
           >
             <Trash2 size={18} />
           </button>
@@ -567,22 +574,21 @@ function DocumentCard({ doc, onDelete, onImportant, onVerified }) {
 
         <div className="mt-5 flex flex-wrap gap-2">
           {doc.isImportant && <Badge icon={Star} text="Important" />}
-
           {doc.isVerified && <Badge icon={BadgeCheck} text="Verified" />}
-
           <Badge icon={Archive} text={doc.fileName || "No file"} />
         </div>
 
-        <div className="mt-5 space-y-3 text-sm text-slate-400">
+        <div className="mt-5 space-y-2 text-sm text-slate-400">
           {doc.fileSize > 0 && <p>Size: {formatFileSize(doc.fileSize)}</p>}
-
           {doc.issuingAuthority && <p>Authority: {doc.issuingAuthority}</p>}
-
           {doc.documentDate && <p>Date: {formatDate(doc.documentDate)}</p>}
-
           {doc.expiryDate && <p>Expiry: {formatDate(doc.expiryDate)}</p>}
 
-          {doc.notes && <p className="leading-6 text-slate-300">{doc.notes}</p>}
+          {doc.notes && (
+            <p className="line-clamp-4 leading-6 text-slate-300">
+              {doc.notes}
+            </p>
+          )}
         </div>
 
         {doc.tags?.length > 0 && (
@@ -598,67 +604,72 @@ function DocumentCard({ doc, onDelete, onImportant, onVerified }) {
           </div>
         )}
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => onImportant(doc)}
-            className="rounded-2xl bg-yellow-500/20 px-4 py-2 text-sm font-semibold text-yellow-200"
-          >
-            Toggle Important
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onVerified(doc)}
-            className="rounded-2xl bg-green-500/20 px-4 py-2 text-sm font-semibold text-green-200"
-          >
-            Toggle Verified
-          </button>
-
-          {doc.fileUrl && (
-            <a
-              href={fileLink}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 rounded-2xl bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-200"
+        <div className="mt-auto pt-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <button
+              type="button"
+              onClick={() => onImportant(doc)}
+              className="rounded-2xl bg-yellow-500/20 px-4 py-2 text-sm font-semibold text-yellow-200 transition hover:bg-yellow-500/30"
             >
-              <LinkIcon size={16} />
-              Open File
-            </a>
-          )}
+              Toggle Important
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onVerified(doc)}
+              className="rounded-2xl bg-green-500/20 px-4 py-2 text-sm font-semibold text-green-200 transition hover:bg-green-500/30"
+            >
+              Toggle Verified
+            </button>
+
+            {doc.fileUrl && (
+              <a
+                href={fileLink}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/30"
+              >
+                <LinkIcon size={16} />
+                Open File
+              </a>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   )
 }
 
 function Badge({ icon: Icon, text }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs text-slate-300">
-      <Icon size={13} />
-      {text}
+    <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs text-slate-300">
+      <Icon size={13} className="shrink-0" />
+      <span className="truncate">{text}</span>
     </span>
   )
 }
 
 function Metric({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+    <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3 md:px-4">
       <p className="text-xs text-slate-400">{label}</p>
-
-      <h3 className="mt-1 text-xl font-bold text-white">{value}</h3>
+      <h3 className="mt-1 text-lg font-bold text-white md:text-xl">
+        {value}
+      </h3>
     </div>
   )
 }
 
 function EmptyVault() {
   return (
-    <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center">
-      <FolderOpen size={54} className="mx-auto text-slate-600" />
+    <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center md:p-12">
+      <FolderOpen size={50} className="mx-auto text-slate-600" />
 
-      <h3 className="mt-5 text-2xl font-bold text-white">Vault is Empty</h3>
+      <h3 className="mt-5 text-xl font-bold text-white md:text-2xl">
+        Vault is Empty
+      </h3>
 
-      <p className="mt-2 text-slate-400">
+      <p className="mt-2 text-sm text-slate-400 md:text-base">
         Upload your first academic document.
       </p>
     </div>
@@ -688,7 +699,7 @@ function Input({ label, value, onChange, type = "text" }) {
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none md:text-base"
       />
     </label>
   )
@@ -704,7 +715,7 @@ function Textarea({ label, value, onChange, placeholder }) {
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none placeholder:text-slate-600"
+        className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 md:text-base"
       />
     </label>
   )
@@ -718,7 +729,7 @@ function Select({ label, value, onChange, options }) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none md:text-base"
       >
         {options.map((option) => (
           <option key={option} value={option} className="bg-slate-900">

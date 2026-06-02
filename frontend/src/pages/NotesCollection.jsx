@@ -13,7 +13,6 @@ import {
   Layers,
   Tags,
   RefreshCcw,
-  CheckCircle2,
 } from "lucide-react"
 
 import {
@@ -47,7 +46,8 @@ function NotesCollection() {
   const [saving, setSaving] = useState(false)
 
   const [search, setSearch] = useState("")
-  const [subjectFilter, setSubjectFilter] = useState("All")
+  const [subjectFilter, setSubjectFilter] =
+    useState("All")
 
   const [form, setForm] = useState({
     title: "",
@@ -97,12 +97,12 @@ function NotesCollection() {
   const filteredNotes = useMemo(() => {
     return notes.filter((note) => {
       const text = `
-        ${note.title || ""}
-        ${note.subject || ""}
-        ${note.chapter || ""}
-        ${note.noteType || ""}
-        ${note.tags?.join(" ") || ""}
-        ${note.content || ""}
+      ${note.title || ""}
+      ${note.subject || ""}
+      ${note.chapter || ""}
+      ${note.noteType || ""}
+      ${note.tags?.join(" ") || ""}
+      ${note.content || ""}
       `.toLowerCase()
 
       const matchesSearch = text.includes(
@@ -123,10 +123,12 @@ function NotesCollection() {
       subjects: new Set(
         notes.map((note) => note.subject).filter(Boolean)
       ).size,
-      important: notes.filter((note) => note.isImportant)
-        .length,
+      important: notes.filter(
+        (note) => note.isImportant
+      ).length,
       needRevision: notes.filter(
-        (note) => note.revisionStatus === "Need Revision"
+        (note) =>
+          note.revisionStatus === "Need Revision"
       ).length,
     }
   }, [notes])
@@ -138,9 +140,27 @@ function NotesCollection() {
       .filter(Boolean)
   }
 
+  const resetForm = () => {
+    setForm({
+      title: "",
+      subject: "",
+      chapter: "",
+      noteType: "Class Note",
+      content: "",
+      tagsText: "",
+      priority: "Medium",
+      revisionStatus: "Not Revised",
+      isImportant: false,
+    })
+  }
+
   const handleCreateNote = async () => {
     try {
-      if (!form.title || !form.subject || !form.content) {
+      if (
+        !form.title ||
+        !form.subject ||
+        !form.content
+      ) {
         return alert(
           "Title, subject, and content are required"
         )
@@ -160,21 +180,11 @@ function NotesCollection() {
         isImportant: form.isImportant,
       })
 
-      setForm({
-        title: "",
-        subject: "",
-        chapter: "",
-        noteType: "Class Note",
-        content: "",
-        tagsText: "",
-        priority: "Medium",
-        revisionStatus: "Not Revised",
-        isImportant: false,
-      })
-
+      resetForm()
       fetchNotes()
     } catch (error) {
       console.log(error)
+
       alert(
         error.response?.data?.message ||
           "Failed to create note"
@@ -205,7 +215,10 @@ function NotesCollection() {
     }
   }
 
-  const updateRevisionStatus = async (note, status) => {
+  const updateRevisionStatus = async (
+    note,
+    status
+  ) => {
     try {
       await updateAcademicNote(note._id, {
         revisionStatus: status,
@@ -219,50 +232,70 @@ function NotesCollection() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/10 p-8 backdrop-blur-xl">
-          <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
+      <div className="mx-auto max-w-7xl space-y-5 md:space-y-8">
+        {/* HERO */}
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-8">
+          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-cyan-500/20 blur-3xl" />
 
-          <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-cyan-500 text-black">
-                <FileText size={42} />
+          <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-purple-500/20 blur-3xl" />
+
+          <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-cyan-500 text-black md:h-16 md:w-16">
+                <FileText size={28} />
               </div>
 
               <div>
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-300">
-                  <BookOpen size={16} />
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-semibold text-cyan-300 md:text-sm">
+                  <BookOpen size={14} />
                   Academic Notes Engine
                 </div>
 
-                <h1 className="text-4xl font-bold text-white md:text-5xl">
+                <h1 className="text-2xl font-bold text-white sm:text-3xl md:text-5xl">
                   Notes Collection
                 </h1>
 
-                <p className="mt-4 max-w-3xl text-slate-300">
-                  Store subject-wise notes, formulas, definitions,
-                  PYQs, revision notes, and important exam material.
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300 md:text-base">
+                  Store formulas, revision notes,
+                  definitions, PYQs, and important
+                  exam content.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Metric label="Notes" value={analytics.total} />
-              <Metric label="Subjects" value={analytics.subjects} />
-              <Metric label="Important" value={analytics.important} />
-              <Metric label="Need Revision" value={analytics.needRevision} />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Metric
+                label="Notes"
+                value={analytics.total}
+              />
+
+              <Metric
+                label="Subjects"
+                value={analytics.subjects}
+              />
+
+              <Metric
+                label="Important"
+                value={analytics.important}
+              />
+
+              <Metric
+                label="Revision"
+                value={analytics.needRevision}
+              />
             </div>
           </div>
         </section>
 
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-          <section className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-            <h2 className="mb-6 text-2xl font-bold text-white">
+        {/* MAIN */}
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+          {/* FORM */}
+          <section className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
+            <h2 className="mb-5 text-xl font-bold text-white md:text-2xl">
               Add Academic Note
             </h2>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <Input
                 label="Note Title"
                 value={form.title}
@@ -308,33 +341,39 @@ function NotesCollection() {
                 options={noteTypes}
               />
 
-              <Select
-                label="Priority"
-                value={form.priority}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    priority: v,
-                  })
-                }
-                options={["Low", "Medium", "High"]}
-              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                <Select
+                  label="Priority"
+                  value={form.priority}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      priority: v,
+                    })
+                  }
+                  options={[
+                    "Low",
+                    "Medium",
+                    "High",
+                  ]}
+                />
 
-              <Select
-                label="Revision Status"
-                value={form.revisionStatus}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    revisionStatus: v,
-                  })
-                }
-                options={revisionStatuses}
-              />
+                <Select
+                  label="Revision Status"
+                  value={form.revisionStatus}
+                  onChange={(v) =>
+                    setForm({
+                      ...form,
+                      revisionStatus: v,
+                    })
+                  }
+                  options={revisionStatuses}
+                />
+              </div>
 
               <Textarea
                 label="Content"
-                rows="8"
+                rows="7"
                 value={form.content}
                 onChange={(v) =>
                   setForm({
@@ -353,7 +392,7 @@ function NotesCollection() {
                     tagsText: v,
                   })
                 }
-                placeholder="Comma separated: exam, unit1, important"
+                placeholder="exam, unit1, important"
               />
 
               <Toggle
@@ -371,41 +410,53 @@ function NotesCollection() {
                 type="button"
                 onClick={handleCreateNote}
                 disabled={saving}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-4 font-bold text-black disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-cyan-400 disabled:opacity-60 md:py-4 md:text-base"
               >
                 {saving ? (
-                  <Loader2 className="animate-spin" size={20} />
+                  <Loader2
+                    className="animate-spin"
+                    size={18}
+                  />
                 ) : (
-                  <Plus size={20} />
+                  <Plus size={18} />
                 )}
-                Save Note
+
+                {saving
+                  ? "Saving..."
+                  : "Save Note"}
               </button>
             </div>
           </section>
 
-          <section className="space-y-6 xl:col-span-2">
-            <div className="rounded-[32px] border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
+          {/* NOTES */}
+          <section className="space-y-5 xl:col-span-2">
+            {/* SEARCH */}
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="relative md:col-span-2">
                   <Search
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
-                    size={20}
+                    size={18}
                   />
 
                   <input
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search notes, subjects, tags, content..."
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 py-4 pl-12 pr-4 text-white outline-none placeholder:text-slate-600"
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
+                    placeholder="Search notes..."
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-slate-600 md:text-base"
                   />
                 </div>
 
                 <select
                   value={subjectFilter}
                   onChange={(e) =>
-                    setSubjectFilter(e.target.value)
+                    setSubjectFilter(
+                      e.target.value
+                    )
                   }
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-white outline-none"
+                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none md:text-base"
                 >
                   {subjects.map((subject) => (
                     <option
@@ -420,32 +471,46 @@ function NotesCollection() {
               </div>
             </div>
 
-            <div className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">
-                  Academic Notes Library
-                </h2>
+            {/* LIST */}
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
+              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-white md:text-2xl">
+                    Academic Notes Library
+                  </h2>
 
-                <span className="rounded-2xl bg-white/10 px-4 py-2 text-sm text-slate-300">
-                  {filteredNotes.length} Notes
+                  <p className="mt-1 text-sm text-slate-400">
+                    {filteredNotes.length} note(s)
+                  </p>
+                </div>
+
+                <span className="w-fit rounded-2xl bg-white/10 px-4 py-2 text-xs text-slate-300 md:text-sm">
+                  {subjectFilter}
                 </span>
               </div>
 
               {loading ? (
                 <div className="flex justify-center py-16">
-                  <Loader2 className="animate-spin text-cyan-300" size={42} />
+                  <Loader2
+                    className="animate-spin text-cyan-300"
+                    size={36}
+                  />
                 </div>
               ) : filteredNotes.length === 0 ? (
                 <EmptyNotes />
               ) : (
-                <div className="grid grid-cols-1 gap-5">
+                <div className="grid grid-cols-1 gap-4">
                   {filteredNotes.map((note) => (
                     <NoteCard
                       key={note._id}
                       note={note}
                       onDelete={handleDelete}
-                      onImportant={toggleImportant}
-                      onRevisionUpdate={updateRevisionStatus}
+                      onImportant={
+                        toggleImportant
+                      }
+                      onRevisionUpdate={
+                        updateRevisionStatus
+                      }
                     />
                   ))}
                 </div>
@@ -465,42 +530,56 @@ function NoteCard({
   onRevisionUpdate,
 }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/20 p-6">
+    <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/20 p-4 md:p-5">
       <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
 
       <div className="relative z-10">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h3 className="text-2xl font-bold text-white">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="break-words text-lg font-bold text-white md:text-2xl">
                 {note.title}
               </h3>
 
               {note.isImportant && (
-                <Badge icon={Star} text="Important" />
+                <Badge
+                  icon={Star}
+                  text="Important"
+                />
               )}
 
-              <Badge icon={Layers} text={note.noteType} />
-              <Badge icon={RefreshCcw} text={note.revisionStatus} />
+              <Badge
+                icon={Layers}
+                text={note.noteType}
+              />
+
+              <Badge
+                icon={RefreshCcw}
+                text={note.revisionStatus}
+              />
             </div>
 
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-xs text-slate-400 md:text-sm">
               {note.subject}
-              {note.chapter ? ` · ${note.chapter}` : ""}
+              {note.chapter
+                ? ` · ${note.chapter}`
+                : ""}
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => onDelete(note._id)}
-            className="rounded-2xl bg-red-500/20 p-3 text-red-300 hover:bg-red-500/30"
+            onClick={() =>
+              onDelete(note._id)
+            }
+            className="flex w-full items-center justify-center rounded-2xl bg-red-500/20 p-3 text-red-300 transition hover:bg-red-500/30 sm:w-auto"
           >
             <Trash2 size={18} />
           </button>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-5">
-          <p className="whitespace-pre-wrap leading-7 text-slate-300">
+        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 md:p-5">
+          <p className="whitespace-pre-wrap break-words text-sm leading-7 text-slate-300 md:text-base">
             {note.content}
           </p>
         </div>
@@ -519,10 +598,12 @@ function NoteCard({
           </div>
         )}
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <button
             type="button"
-            onClick={() => onImportant(note)}
+            onClick={() =>
+              onImportant(note)
+            }
             className="rounded-2xl bg-yellow-500/20 px-4 py-2 text-sm font-semibold text-yellow-200"
           >
             Toggle Important
@@ -533,9 +614,12 @@ function NoteCard({
               key={status}
               type="button"
               onClick={() =>
-                onRevisionUpdate(note, status)
+                onRevisionUpdate(
+                  note,
+                  status
+                )
               }
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold ${
+              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
                 note.revisionStatus === status
                   ? "bg-cyan-500 text-black"
                   : "bg-white/10 text-slate-300"
@@ -546,7 +630,7 @@ function NoteCard({
           ))}
         </div>
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -561,10 +645,12 @@ function Badge({ icon: Icon, text }) {
 
 function Metric({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-      <p className="text-xs text-slate-400">{label}</p>
+    <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3 md:px-4">
+      <p className="text-xs text-slate-400">
+        {label}
+      </p>
 
-      <h3 className="mt-1 text-xl font-bold text-white">
+      <h3 className="mt-1 text-lg font-bold text-white md:text-xl">
         {value}
       </h3>
     </div>
@@ -573,29 +659,40 @@ function Metric({ label, value }) {
 
 function EmptyNotes() {
   return (
-    <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center">
-      <FileText size={54} className="mx-auto text-slate-600" />
+    <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center md:p-12">
+      <FileText
+        size={50}
+        className="mx-auto text-slate-600"
+      />
 
-      <h3 className="mt-5 text-2xl font-bold text-white">
+      <h3 className="mt-5 text-xl font-bold text-white md:text-2xl">
         Notes Collection is Empty
       </h3>
 
-      <p className="mt-2 text-slate-400">
+      <p className="mt-2 text-sm text-slate-400 md:text-base">
         Add your first academic note.
       </p>
     </div>
   )
 }
 
-function Toggle({ label, checked, onChange }) {
+function Toggle({
+  label,
+  checked,
+  onChange,
+}) {
   return (
     <label className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-      <span className="text-sm text-slate-300">{label}</span>
+      <span className="text-sm text-slate-300">
+        {label}
+      </span>
 
       <input
         type="checkbox"
         checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={(e) =>
+          onChange(e.target.checked)
+        }
       />
     </label>
   )
@@ -616,8 +713,10 @@ function Input({
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none md:text-base"
       />
     </label>
   )
@@ -640,8 +739,10 @@ function Textarea({
         rows={rows}
         value={value}
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none placeholder:text-slate-600"
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 md:text-base"
       />
     </label>
   )
@@ -661,8 +762,10 @@ function Select({
 
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none md:text-base"
       >
         {options.map((option) => (
           <option
