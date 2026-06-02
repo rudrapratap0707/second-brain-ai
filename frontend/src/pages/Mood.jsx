@@ -32,42 +32,36 @@ const moodOptions = [
     emoji: "😊",
     score: 5,
     icon: Smile,
-    description: "Positive and energetic",
   },
   {
     label: "Focused",
     emoji: "🎯",
     score: 4,
     icon: Target,
-    description: "Productive and attentive",
   },
   {
     label: "Neutral",
     emoji: "😐",
     score: 3,
     icon: Meh,
-    description: "Balanced and normal",
   },
   {
     label: "Stressed",
     emoji: "🔥",
     score: 2,
     icon: Flame,
-    description: "Pressure or overload",
   },
   {
     label: "Sad",
     emoji: "😔",
     score: 1,
     icon: Frown,
-    description: "Low or emotionally down",
   },
   {
     label: "Tired",
     emoji: "😴",
     score: 2,
     icon: Moon,
-    description: "Low energy or sleepy",
   },
 ]
 
@@ -75,22 +69,23 @@ function Mood() {
   const [selectedMood, setSelectedMood] = useState(null)
   const [note, setNote] = useState("")
   const [moods, setMoods] = useState([])
+
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
   const fetchMoods = async () => {
     try {
       setLoading(true)
-      setError("")
 
       const data = await getMoods()
 
       setMoods(data.moods || [])
     } catch (error) {
       console.log(error)
-      setError("Failed to load mood history.")
+      setError("Failed to load moods.")
     } finally {
       setLoading(false)
     }
@@ -100,15 +95,9 @@ function Mood() {
     fetchMoods()
   }, [])
 
-  const handleSelectMood = (mood) => {
-    setSelectedMood(mood)
-    setError("")
-    setSuccess("")
-  }
-
   const handleSaveMood = async () => {
     if (!selectedMood) {
-      setError("Please select your mood first.")
+      setError("Please select a mood.")
       return
     }
 
@@ -125,6 +114,7 @@ function Mood() {
 
       setSelectedMood(null)
       setNote("")
+
       setSuccess("Mood saved successfully.")
 
       fetchMoods()
@@ -139,11 +129,9 @@ function Mood() {
   const handleDeleteMood = async (id) => {
     try {
       await deleteMood(id)
-
       fetchMoods()
     } catch (error) {
       console.log(error)
-      setError("Failed to delete mood.")
     }
   }
 
@@ -163,16 +151,6 @@ function Mood() {
     )
 
     return (total / moods.length).toFixed(1)
-  }, [moods])
-
-  const latestMood = moods[0]
-
-  const bestMood = useMemo(() => {
-    if (moods.length === 0) return null
-
-    return moods.reduce((best, current) =>
-      current.score > best.score ? current : best
-    )
   }, [moods])
 
   const moodCounts = useMemo(() => {
@@ -195,19 +173,14 @@ function Mood() {
     return entries[0][0]
   }, [moodCounts])
 
+  const latestMood = moods[0]
+
   const getMoodEmoji = (moodName) => {
-    const found = moodOptions.find((item) => item.label === moodName)
+    const found = moodOptions.find(
+      (item) => item.label === moodName
+    )
 
     return found?.emoji || "🙂"
-  }
-
-  const getMoodColor = (score) => {
-    if (score >= 5) return "text-green-300"
-    if (score >= 4) return "text-cyan-300"
-    if (score >= 3) return "text-yellow-300"
-    if (score >= 2) return "text-orange-300"
-
-    return "text-red-300"
   }
 
   const getMoodBadgeClass = (score) => {
@@ -232,153 +205,134 @@ function Mood() {
 
   const getInsight = () => {
     if (moods.length === 0) {
-      return "Start tracking your mood daily to build emotional awareness."
+      return "Start tracking your mood daily."
     }
 
     if (averageScore >= 4) {
-      return "Your recent mood trend looks positive. Keep following your current routine."
+      return "Your recent mood trend looks positive."
     }
 
     if (averageScore >= 3) {
-      return "Your mood is balanced. Try maintaining sleep, study breaks, and light movement."
+      return "Your mood is balanced and stable."
     }
 
-    return "Your mood trend seems low. Take short breaks, hydrate, and avoid overload today."
+    return "Your mood trend seems low. Take rest and avoid overload."
   }
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-4">
-              <HeartPulse className="text-cyan-400" size={44} />
+      <div className="page-shell mx-auto max-w-7xl space-y-5 md:space-y-8">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
+          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-cyan-500/20 blur-3xl" />
 
-              <h1 className="text-5xl font-bold">
-                Mood Tracker
-              </h1>
+          <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-purple-500/20 blur-3xl" />
+
+          <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-300 md:h-16 md:w-16">
+                <HeartPulse size={34} />
+              </div>
+
+              <div>
+                <h1 className="text-2xl font-extrabold text-white sm:text-3xl md:text-5xl">
+                  Mood Tracker
+                </h1>
+
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400 md:text-base">
+                  Track your emotions and monitor mental wellness daily.
+                </p>
+              </div>
             </div>
 
-            <p className="text-slate-400 mt-4 text-lg">
-              Track your daily mood and understand your emotional patterns.
-            </p>
-          </div>
+            <div className="rounded-3xl border border-white/10 bg-white/10 px-5 py-4">
+              <p className="text-xs text-slate-400 md:text-sm">
+                Today's Mood
+              </p>
 
-          <div className="bg-white/10 border border-white/10 rounded-3xl px-6 py-5">
-            <p className="text-slate-400 text-sm">
-              Today&apos;s status
-            </p>
-
-            <h2 className="text-3xl font-bold mt-2">
-              {latestMood
-                ? `${getMoodEmoji(latestMood.mood)} ${latestMood.mood}`
-                : "Not logged yet"}
-            </h2>
+              <h2 className="mt-2 text-xl font-bold md:text-3xl">
+                {latestMood
+                  ? `${getMoodEmoji(latestMood.mood)} ${latestMood.mood}`
+                  : "Not logged"}
+              </h2>
+            </div>
           </div>
-        </div>
+        </section>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-400/20 text-red-300 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
-            <span>{error}</span>
-
-            <button onClick={() => setError("")}>
-              <X size={18} />
-            </button>
-          </div>
+          <AlertBox
+            type="error"
+            text={error}
+            onClose={() => setError("")}
+          />
         )}
 
         {success && (
-          <div className="bg-green-500/10 border border-green-400/20 text-green-300 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
-            <span>{success}</span>
-
-            <button onClick={() => setSuccess("")}>
-              <X size={18} />
-            </button>
-          </div>
+          <AlertBox
+            type="success"
+            text={success}
+            onClose={() => setSuccess("")}
+          />
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-slate-400">
-                Total Entries
-              </h3>
+        <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <MiniStat
+            title="Entries"
+            value={moods.length}
+            icon={CalendarDays}
+          />
 
-              <CalendarDays className="text-cyan-400" size={24} />
-            </div>
+          <MiniStat
+            title="Average"
+            value={averageScore}
+            icon={BarChart3}
+          />
 
-            <p className="text-5xl font-bold mt-4">
-              {moods.length}
-            </p>
-          </div>
+          <MiniStat
+            title="Frequent"
+            value={mostFrequentMood}
+            icon={Brain}
+          />
+        </section>
 
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-slate-400">
-                Average Score
-              </h3>
+        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <Sparkles
+                className="text-cyan-400"
+                size={24}
+              />
 
-              <BarChart3 className="text-purple-400" size={24} />
-            </div>
-
-            <p className="text-5xl font-bold mt-4">
-              {averageScore}
-            </p>
-
-            <p className="text-slate-500 mt-2">
-              Out of 5
-            </p>
-          </div>
-
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-slate-400">
-                Most Frequent
-              </h3>
-
-              <Brain className="text-green-400" size={24} />
-            </div>
-
-            <p className="text-4xl font-bold mt-4">
-              {mostFrequentMood}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-6">
-          <div className="bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-            <div className="flex items-center gap-3 mb-6">
-              <Sparkles className="text-cyan-400" size={28} />
-
-              <h2 className="text-3xl font-bold">
+              <h2 className="text-xl font-bold text-white md:text-2xl">
                 How are you feeling?
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {moodOptions.map((moodItem) => {
                 const Icon = moodItem.icon
+
                 const isActive =
                   selectedMood?.label === moodItem.label
 
                 return (
                   <button
                     key={moodItem.label}
-                    type="button"
-                    onClick={() => handleSelectMood(moodItem)}
-                    className={`text-left px-5 py-5 rounded-3xl border transition ${
+                    onClick={() =>
+                      setSelectedMood(moodItem)
+                    }
+                    className={`rounded-3xl border p-4 text-left transition ${
                       isActive
-                        ? "bg-cyan-500 text-black border-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.35)]"
-                        : "bg-white/10 border-white/10 hover:bg-white/20 text-white"
+                        ? "border-cyan-400 bg-cyan-500 text-black"
+                        : "border-white/10 bg-white/10 text-white hover:bg-white/20"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl">
+                      <span className="text-2xl">
                         {moodItem.emoji}
                       </span>
 
                       <Icon
-                        size={22}
+                        size={18}
                         className={
                           isActive
                             ? "text-black"
@@ -387,74 +341,64 @@ function Mood() {
                       />
                     </div>
 
-                    <h3 className="font-bold text-xl mt-4">
+                    <h3 className="mt-3 text-sm font-bold md:text-base">
                       {moodItem.label}
                     </h3>
 
                     <p
-                      className={`text-sm mt-2 ${
+                      className={`mt-2 text-xs ${
                         isActive
                           ? "text-black/70"
                           : "text-slate-400"
                       }`}
                     >
-                      {moodItem.description}
-                    </p>
-
-                    <p
-                      className={`text-xs mt-3 ${
-                        isActive
-                          ? "text-black/70"
-                          : "text-slate-500"
-                      }`}
-                    >
-                      Score: {moodItem.score}/5
+                      Score {moodItem.score}/5
                     </p>
                   </button>
                 )
               })}
             </div>
 
-            <div className="mt-8">
-              <label className="text-slate-300 font-medium">
-                Reason or note about your mood
+            <div className="mt-6">
+              <label className="text-sm text-slate-300">
+                Note
               </label>
 
               <textarea
-                placeholder="Example: I felt productive after completing my study target..."
+                placeholder="Write how you feel..."
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                rows="6"
-                className="w-full mt-4 bg-white/10 border border-white/10 rounded-3xl px-5 py-4 outline-none text-white placeholder:text-slate-500 resize-none"
+                rows="5"
+                className="mt-3 w-full resize-none rounded-3xl border border-white/10 bg-white/10 px-4 py-4 text-sm text-white outline-none placeholder:text-slate-500 md:text-base"
               />
             </div>
 
             {selectedMood && (
-              <div className="mt-6 bg-cyan-500/10 border border-cyan-400/20 rounded-3xl p-5">
-                <p className="text-cyan-300 text-sm">
+              <div className="mt-5 rounded-3xl border border-cyan-400/20 bg-cyan-500/10 p-4">
+                <p className="text-sm text-cyan-300">
                   Selected Mood
                 </p>
 
-                <h3 className="text-3xl font-bold mt-2">
-                  {selectedMood.emoji} {selectedMood.label}
+                <h3 className="mt-2 text-2xl font-bold md:text-3xl">
+                  {selectedMood.emoji}{" "}
+                  {selectedMood.label}
                 </h3>
-
-                <p className="text-slate-400 mt-2">
-                  Score: {selectedMood.score}/5
-                </p>
               </div>
             )}
 
-            <div className="flex flex-wrap gap-4 mt-7">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={handleSaveMood}
                 disabled={saving}
-                className="flex items-center gap-2 px-7 py-4 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold disabled:opacity-60"
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-cyan-400 disabled:opacity-60"
               >
                 {saving ? (
-                  <Loader2 className="animate-spin" size={20} />
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                  />
                 ) : (
-                  <Save size={20} />
+                  <Save size={18} />
                 )}
 
                 {saving ? "Saving..." : "Save Mood"}
@@ -462,30 +406,35 @@ function Mood() {
 
               <button
                 onClick={clearSelection}
-                className="px-7 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold"
+                className="rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/20"
               >
                 Clear
               </button>
             </div>
           </div>
 
-          <div className="bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-            <div className="flex items-center gap-3 mb-6">
-              <Brain className="text-purple-400" size={28} />
+          <div className="space-y-5">
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <Brain
+                  className="text-purple-400"
+                  size={24}
+                />
 
-              <h2 className="text-3xl font-bold">
-                AI Mood Insight
-              </h2>
+                <h2 className="text-xl font-bold text-white md:text-2xl">
+                  AI Mood Insight
+                </h2>
+              </div>
+
+              <div className="rounded-3xl border border-white/5 bg-black/20 p-4">
+                <p className="text-sm leading-7 text-slate-300 md:text-base">
+                  {getInsight()}
+                </p>
+              </div>
             </div>
 
-            <div className="bg-black/20 border border-white/5 rounded-3xl p-6">
-              <p className="text-slate-300 leading-relaxed">
-                {getInsight()}
-              </p>
-            </div>
-
-            <div className="mt-8">
-              <h3 className="text-xl font-bold mb-4">
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
+              <h3 className="mb-4 text-lg font-bold text-white">
                 Mood Distribution
               </h3>
 
@@ -497,13 +446,13 @@ function Mood() {
                   return (
                     <div
                       key={item.label}
-                      className="flex items-center justify-between bg-white/10 rounded-2xl px-4 py-3"
+                      className="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3"
                     >
-                      <span>
+                      <span className="text-sm">
                         {item.emoji} {item.label}
                       </span>
 
-                      <span className="text-cyan-300 font-bold">
+                      <span className="font-bold text-cyan-300">
                         {count}
                       </span>
                     </div>
@@ -511,56 +460,46 @@ function Mood() {
                 })}
               </div>
             </div>
-
-            {bestMood && (
-              <div className="mt-8 bg-green-500/10 border border-green-400/20 rounded-3xl p-5">
-                <p className="text-green-300 text-sm">
-                  Best Recorded Mood
-                </p>
-
-                <h3 className="text-2xl font-bold mt-2">
-                  {getMoodEmoji(bestMood.mood)} {bestMood.mood}
-                </h3>
-
-                <p className="text-slate-400 mt-2">
-                  Score: {bestMood.score}/5
-                </p>
-              </div>
-            )}
           </div>
-        </div>
+        </section>
 
-        <div className="bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl mt-10">
-          <div className="flex items-center justify-between gap-4 mb-6">
+        <section className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-6">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-3xl font-bold">
+              <h2 className="text-xl font-bold text-white md:text-2xl">
                 Mood History
               </h2>
 
-              <p className="text-slate-400 mt-2">
-                Your recent emotional records appear here.
+              <p className="mt-1 text-sm text-slate-400">
+                Your recent emotional timeline.
               </p>
             </div>
 
             {loading && (
-              <Loader2 className="animate-spin text-cyan-400" size={28} />
+              <Loader2
+                className="animate-spin text-cyan-400"
+                size={24}
+              />
             )}
           </div>
 
           {loading ? (
-            <div className="border border-dashed border-white/20 rounded-2xl p-10 text-center text-slate-400">
-              Loading mood history...
+            <div className="rounded-3xl border border-dashed border-white/20 p-10 text-center text-slate-400">
+              Loading history...
             </div>
           ) : moods.length === 0 ? (
-            <div className="border border-dashed border-white/20 rounded-2xl p-12 text-center text-slate-400">
-              <HeartPulse size={60} className="mx-auto text-slate-500 mb-5" />
+            <div className="rounded-3xl border border-dashed border-white/20 p-10 text-center">
+              <HeartPulse
+                size={52}
+                className="mx-auto mb-5 text-slate-500"
+              />
 
-              <h3 className="text-2xl font-bold text-white mb-3">
-                No Mood History Yet
+              <h3 className="mb-3 text-2xl font-bold text-white">
+                No Mood History
               </h3>
 
-              <p>
-                Select your mood and save it to start building your emotional timeline.
+              <p className="text-sm text-slate-400 md:text-base">
+                Save your first mood entry.
               </p>
             </div>
           ) : (
@@ -568,54 +507,99 @@ function Mood() {
               {moods.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-white/10 border border-white/10 rounded-3xl p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5"
+                  className="rounded-3xl border border-white/10 bg-white/10 p-4 transition hover:bg-white/15 md:p-5"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="text-4xl">
-                      {getMoodEmoji(item.mood)}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <h3 className="text-2xl font-bold">
-                          {item.mood}
-                        </h3>
-
-                        <span
-                          className={`text-sm px-3 py-1 rounded-full border ${getMoodBadgeClass(
-                            item.score
-                          )}`}
-                        >
-                          Score {item.score}/5
-                        </span>
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="text-3xl">
+                        {getMoodEmoji(item.mood)}
                       </div>
 
-                      {item.note && (
-                        <p className="text-slate-300 mt-3 whitespace-pre-line">
-                          {item.note}
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-bold text-white md:text-xl">
+                            {item.mood}
+                          </h3>
+
+                          <span
+                            className={`rounded-full border px-3 py-1 text-xs ${getMoodBadgeClass(
+                              item.score
+                            )}`}
+                          >
+                            Score {item.score}/5
+                          </span>
+                        </div>
+
+                        {item.note && (
+                          <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-300">
+                            {item.note}
+                          </p>
+                        )}
+
+                        <p className="mt-3 text-xs text-slate-500">
+                          {new Date(
+                            item.createdAt
+                          ).toLocaleString()}
                         </p>
-                      )}
-
-                      <p className="text-slate-500 text-sm mt-3">
-                        {new Date(item.createdAt).toLocaleString()}
-                      </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={() => handleDeleteMood(item._id)}
-                    className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-400 transition px-5 py-3 rounded-2xl text-white font-medium"
-                  >
-                    <Trash2 size={18} />
-                    Delete
-                  </button>
+                    <button
+                      onClick={() =>
+                        handleDeleteMood(item._id)
+                      }
+                      className="flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-400"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
     </DashboardLayout>
+  )
+}
+
+function MiniStat({ title, value, icon: Icon }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm text-slate-400">
+          {title}
+        </h3>
+
+        <Icon size={22} className="text-cyan-400" />
+      </div>
+
+      <p className="text-2xl font-bold text-white md:text-4xl">
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function AlertBox({ type, text, onClose }) {
+  const styles =
+    type === "error"
+      ? "bg-red-500/10 border-red-400/20 text-red-300"
+      : "bg-green-500/10 border-green-400/20 text-green-300"
+
+  return (
+    <div
+      className={`flex items-center justify-between gap-4 rounded-2xl border px-4 py-4 ${styles}`}
+    >
+      <span className="text-sm md:text-base">
+        {text}
+      </span>
+
+      <button onClick={onClose}>
+        <X size={18} />
+      </button>
+    </div>
   )
 }
 

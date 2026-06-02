@@ -12,7 +12,6 @@ import {
 import {
   Bell,
   Plus,
-  CalendarDays,
   Clock3,
   Trash2,
   CheckCircle2,
@@ -28,23 +27,21 @@ import {
   Filter,
   TimerReset,
   ClipboardList,
+  CalendarDays,
 } from "lucide-react"
 
 const priorityOptions = [
   {
     label: "Low",
     value: "Low",
-    description: "Light task",
   },
   {
     label: "Medium",
     value: "Medium",
-    description: "Normal priority",
   },
   {
     label: "High",
     value: "High",
-    description: "Important task",
   },
 ]
 
@@ -101,7 +98,7 @@ function Reminders() {
     }
 
     if (!dueDate) {
-      setError("Please select due date and time.")
+      setError("Please select due date.")
       return
     }
 
@@ -119,7 +116,7 @@ function Reminders() {
 
       resetForm()
 
-      setSuccess("Reminder added successfully.")
+      setSuccess("Reminder created successfully.")
 
       fetchReminders()
     } catch (error) {
@@ -133,22 +130,18 @@ function Reminders() {
   const handleToggleReminder = async (id) => {
     try {
       await toggleReminder(id)
-
       fetchReminders()
     } catch (error) {
       console.log(error)
-      setError("Failed to update reminder.")
     }
   }
 
   const handleDeleteReminder = async (id) => {
     try {
       await deleteReminder(id)
-
       fetchReminders()
     } catch (error) {
       console.log(error)
-      setError("Failed to delete reminder.")
     }
   }
 
@@ -179,16 +172,6 @@ function Reminders() {
 
   const overdueReminders = useMemo(() => {
     return reminders.filter((item) => isOverdue(item))
-  }, [reminders])
-
-  const todayReminders = useMemo(() => {
-    return reminders.filter((item) => isDueToday(item))
-  }, [reminders])
-
-  const highPriorityReminders = useMemo(() => {
-    return reminders.filter(
-      (item) => item.priority === "High" && !item.completed
-    )
   }, [reminders])
 
   const completionRate = useMemo(() => {
@@ -258,7 +241,7 @@ function Reminders() {
 
     if (isDueToday(reminder)) {
       return {
-        label: "Due Today",
+        label: "Today",
         className:
           "bg-cyan-500/10 border-cyan-400/20 text-cyan-300",
       }
@@ -274,239 +257,171 @@ function Reminders() {
   const formatDateTime = (dateValue) => {
     if (!dateValue) return "No date"
 
-    return new Date(dateValue).toLocaleString()
-  }
-
-  const getProductivityInsight = () => {
-    if (reminders.length === 0) {
-      return "Add your first reminder to start planning your tasks and deadlines."
-    }
-
-    if (overdueReminders.length > 0) {
-      return `You have ${overdueReminders.length} overdue reminder(s). Clear them first to reduce pressure.`
-    }
-
-    if (highPriorityReminders.length > 0) {
-      return `You have ${highPriorityReminders.length} high-priority pending task(s). Focus on them first.`
-    }
-
-    if (todayReminders.length > 0) {
-      return `You have ${todayReminders.length} reminder(s) scheduled for today. Stay consistent.`
-    }
-
-    if (completionRate >= 70) {
-      return "Great progress. Your reminder completion rate is strong."
-    }
-
-    return "Your reminder board is active. Keep updating tasks regularly."
+    return new Date(dateValue).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-4">
-              <Bell className="text-cyan-400" size={44} />
+      <div className="page-shell mx-auto max-w-7xl space-y-5 md:space-y-8">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
+          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-cyan-500/20 blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-purple-500/20 blur-3xl" />
 
-              <h1 className="text-5xl font-bold">
-                Reminders
-              </h1>
+          <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-300 md:h-16 md:w-16">
+                <Bell size={34} />
+              </div>
+
+              <div>
+                <h1 className="text-2xl font-extrabold text-white sm:text-3xl md:text-5xl">
+                  Reminders
+                </h1>
+
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400 md:text-base">
+                  Manage deadlines, tasks, study goals, and daily reminders.
+                </p>
+              </div>
             </div>
 
-            <p className="text-slate-400 mt-4 text-lg">
-              Plan your tasks, deadlines, study targets, and priority reminders.
-            </p>
-          </div>
-
-          <button
-            onClick={fetchReminders}
-            className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/20 transition"
-          >
-            <RefreshCcw size={18} />
-            Refresh
-          </button>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-400/20 text-red-300 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
-            <span>{error}</span>
-
-            <button onClick={() => setError("")}>
-              <X size={18} />
+            <button
+              onClick={fetchReminders}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/20 sm:w-fit"
+            >
+              <RefreshCcw size={18} />
+              Refresh
             </button>
           </div>
+        </section>
+
+        {error && (
+          <AlertBox
+            type="error"
+            text={error}
+            onClose={() => setError("")}
+          />
         )}
 
         {success && (
-          <div className="bg-green-500/10 border border-green-400/20 text-green-300 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
-            <span>{success}</span>
-
-            <button onClick={() => setSuccess("")}>
-              <X size={18} />
-            </button>
-          </div>
+          <AlertBox
+            type="success"
+            text={success}
+            onClose={() => setSuccess("")}
+          />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-slate-400">
-                Total
-              </h3>
+        <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <MiniStat
+            title="Total"
+            value={reminders.length}
+            icon={ClipboardList}
+          />
 
-              <ClipboardList className="text-cyan-400" size={24} />
-            </div>
+          <MiniStat
+            title="Pending"
+            value={pendingReminders.length}
+            icon={ListTodo}
+          />
 
-            <p className="text-5xl font-bold mt-4">
-              {reminders.length}
-            </p>
-          </div>
+          <MiniStat
+            title="Completed"
+            value={completedReminders.length}
+            icon={CheckCircle2}
+          />
 
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-slate-400">
-                Pending
-              </h3>
+          <MiniStat
+            title="Overdue"
+            value={overdueReminders.length}
+            icon={AlertTriangle}
+          />
+        </section>
 
-              <ListTodo className="text-yellow-400" size={24} />
-            </div>
+        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[0.85fr_1.15fr]">
+          <div className="space-y-5">
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <Plus className="text-cyan-400" size={24} />
 
-            <p className="text-5xl font-bold mt-4">
-              {pendingReminders.length}
-            </p>
-          </div>
-
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-slate-400">
-                Completed
-              </h3>
-
-              <CheckCircle2 className="text-green-400" size={24} />
-            </div>
-
-            <p className="text-5xl font-bold mt-4">
-              {completedReminders.length}
-            </p>
-          </div>
-
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-slate-400">
-                Overdue
-              </h3>
-
-              <AlertTriangle className="text-red-400" size={24} />
-            </div>
-
-            <p className="text-5xl font-bold mt-4">
-              {overdueReminders.length}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-6">
-          <div className="space-y-6">
-            <div className="bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <Plus className="text-cyan-400" size={28} />
-
-                <h2 className="text-3xl font-bold">
+                <h2 className="text-xl font-bold text-white md:text-2xl">
                   Add Reminder
                 </h2>
               </div>
 
-              <form onSubmit={handleCreateReminder}>
-                <label className="text-slate-300 font-medium">
-                  Reminder Title
-                </label>
-
+              <form
+                onSubmit={handleCreateReminder}
+                className="space-y-4"
+              >
                 <input
                   type="text"
-                  placeholder="Example: Revise Python Module 3"
+                  placeholder="Reminder title..."
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full mt-3 bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder:text-slate-500 mb-5"
+                  className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 md:text-base"
                 />
-
-                <label className="text-slate-300 font-medium">
-                  Description
-                </label>
 
                 <textarea
-                  placeholder="Optional details about this task..."
+                  placeholder="Description..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows="5"
-                  className="w-full mt-3 bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white placeholder:text-slate-500 resize-none mb-5"
+                  rows="4"
+                  className="w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 md:text-base"
                 />
 
-                <label className="text-slate-300 font-medium">
-                  Due Date & Time
-                </label>
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-sm text-slate-400">
+                    <CalendarDays size={16} />
+                    Due Date
+                  </label>
 
-                <input
-                  type="datetime-local"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full mt-3 bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white mb-5"
-                />
+                  <input
+                    type="datetime-local"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none md:text-base"
+                  />
+                </div>
 
-                <label className="text-slate-300 font-medium">
-                  Priority
-                </label>
-
-                <div className="grid grid-cols-3 gap-3 mt-3 mb-6">
+                <div className="grid grid-cols-3 gap-3">
                   {priorityOptions.map((item) => (
                     <button
                       key={item.value}
                       type="button"
                       onClick={() => setPriority(item.value)}
-                      className={`rounded-2xl px-4 py-4 border transition ${
+                      className={`rounded-2xl border px-3 py-3 text-sm font-semibold transition ${
                         priority === item.value
-                          ? "bg-cyan-500 text-black border-cyan-400"
-                          : "bg-white/10 border-white/10 hover:bg-white/20 text-white"
+                          ? "border-cyan-400 bg-cyan-500 text-black"
+                          : "border-white/10 bg-white/10 text-white hover:bg-white/20"
                       }`}
                     >
-                      <p className="font-bold">
-                        {item.label}
-                      </p>
-
-                      <p
-                        className={`text-xs mt-1 ${
-                          priority === item.value
-                            ? "text-black/70"
-                            : "text-slate-400"
-                        }`}
-                      >
-                        {item.description}
-                      </p>
+                      {item.label}
                     </button>
                   ))}
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center justify-center gap-2 flex-1 px-6 py-4 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold disabled:opacity-60"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-cyan-400 disabled:opacity-60"
                   >
                     {saving ? (
-                      <Loader2 className="animate-spin" size={20} />
+                      <Loader2 size={18} className="animate-spin" />
                     ) : (
-                      <Plus size={20} />
+                      <Plus size={18} />
                     )}
 
-                    {saving
-                      ? "Adding..."
-                      : "Add Reminder"}
+                    {saving ? "Adding..." : "Add Reminder"}
                   </button>
 
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10"
+                    className="rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/20"
                   >
                     Clear
                   </button>
@@ -514,255 +429,314 @@ function Reminders() {
               </form>
             </div>
 
-            <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-[32px] p-8">
-              <div className="flex items-center gap-3 mb-5">
-                <Sparkles className="text-cyan-300" size={28} />
+            <div className="rounded-3xl border border-cyan-400/20 bg-cyan-500/10 p-4 md:p-6">
+              <div className="mb-4 flex items-center gap-3">
+                <Sparkles className="text-cyan-300" size={22} />
 
-                <h2 className="text-3xl font-bold text-cyan-300">
+                <h2 className="text-xl font-bold text-cyan-300 md:text-2xl">
                   Productivity Insight
                 </h2>
               </div>
 
-              <p className="text-slate-200 leading-relaxed">
-                {getProductivityInsight()}
+              <p className="text-sm leading-7 text-slate-200 md:text-base">
+                {completionRate >= 70
+                  ? "Your reminder completion rate is strong. Keep maintaining consistency."
+                  : "Complete pending tasks regularly to improve productivity."}
               </p>
 
-              <div className="mt-6 bg-black/20 border border-white/5 rounded-3xl p-5">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400">
+              <div className="mt-5 rounded-2xl border border-white/5 bg-black/20 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm text-slate-400">
                     Completion Rate
                   </span>
 
-                  <span className="text-2xl font-bold text-cyan-300">
+                  <span className="text-xl font-bold text-cyan-300 md:text-2xl">
                     {completionRate}%
                   </span>
                 </div>
 
-                <div className="w-full h-3 bg-white/10 rounded-full mt-4 overflow-hidden">
+                <div className="h-3 overflow-hidden rounded-full bg-white/10">
                   <div
-                    className="h-full bg-cyan-400 rounded-full"
+                    className="h-full rounded-full bg-cyan-400"
                     style={{
                       width: `${completionRate}%`,
                     }}
-                  ></div>
+                  />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-6">
+          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-6">
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="text-3xl font-bold">
+                <h2 className="text-xl font-bold text-white md:text-2xl">
                   Reminder List
                 </h2>
 
-                <p className="text-slate-400 mt-2">
-                  View, complete, filter, and delete reminders.
+                <p className="mt-1 text-sm text-slate-400">
+                  {filteredReminders.length} reminder(s)
                 </p>
               </div>
 
               {loading && (
-                <Loader2 className="animate-spin text-cyan-400" size={28} />
+                <Loader2
+                  className="animate-spin text-cyan-400"
+                  size={24}
+                />
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="text-slate-400 text-sm flex items-center gap-2 mb-2">
-                  <Filter size={16} />
-                  Status Filter
-                </label>
+            <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="rounded-2xl border border-white/10 bg-[#11162A] px-4 py-3 text-sm outline-none"
+              >
+                <option>All</option>
+                <option>Pending</option>
+                <option>Completed</option>
+                <option>Today</option>
+                <option>Overdue</option>
+              </select>
 
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="w-full bg-[#11162A] border border-white/10 rounded-2xl px-4 py-3 outline-none text-white"
-                >
-                  <option>All</option>
-                  <option>Pending</option>
-                  <option>Completed</option>
-                  <option>Today</option>
-                  <option>Overdue</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-slate-400 text-sm flex items-center gap-2 mb-2">
-                  <Flag size={16} />
-                  Priority Filter
-                </label>
-
-                <select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="w-full bg-[#11162A] border border-white/10 rounded-2xl px-4 py-3 outline-none text-white"
-                >
-                  <option>All</option>
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                </select>
-              </div>
+              <select
+                value={priorityFilter}
+                onChange={(e) =>
+                  setPriorityFilter(e.target.value)
+                }
+                className="rounded-2xl border border-white/10 bg-[#11162A] px-4 py-3 text-sm outline-none"
+              >
+                <option>All</option>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
             </div>
 
             {loading ? (
-              <div className="border border-dashed border-white/20 rounded-2xl p-10 text-center text-slate-400">
+              <div className="rounded-3xl border border-dashed border-white/20 p-10 text-center text-slate-400">
                 Loading reminders...
               </div>
             ) : filteredReminders.length === 0 ? (
-              <div className="border border-dashed border-white/20 rounded-2xl p-12 text-center text-slate-400">
-                <TimerReset size={60} className="mx-auto text-slate-500 mb-5" />
+              <div className="rounded-3xl border border-dashed border-white/20 p-10 text-center">
+                <TimerReset
+                  size={52}
+                  className="mx-auto mb-5 text-slate-500"
+                />
 
-                <h3 className="text-2xl font-bold text-white mb-3">
+                <h3 className="mb-3 text-2xl font-bold text-white">
                   No Reminders Found
                 </h3>
 
-                <p>
-                  Add a new reminder or change filters to see your tasks.
+                <p className="text-sm text-slate-400 md:text-base">
+                  Add a reminder or change filters.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4 max-h-[720px] overflow-y-auto pr-2">
+              <div className="space-y-4">
                 {filteredReminders.map((reminder) => {
-                  const status = getReminderStatus(reminder)
+                  const status =
+                    getReminderStatus(reminder)
 
                   return (
-                    <div
+                    <ReminderCard
                       key={reminder._id}
-                      className={`rounded-3xl p-5 border transition ${
-                        reminder.completed
-                          ? "bg-green-500/5 border-green-400/20"
-                          : isOverdue(reminder)
-                          ? "bg-red-500/5 border-red-400/20"
-                          : "bg-white/10 border-white/10 hover:bg-white/15"
-                      }`}
-                    >
-                      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-                        <div className="flex items-start gap-4">
-                          <button
-                            onClick={() =>
-                              handleToggleReminder(reminder._id)
-                            }
-                            className="mt-1"
-                          >
-                            {reminder.completed ? (
-                              <CheckCircle2
-                                className="text-green-400"
-                                size={28}
-                              />
-                            ) : (
-                              <Circle
-                                className="text-slate-400 hover:text-cyan-400"
-                                size={28}
-                              />
-                            )}
-                          </button>
-
-                          <div>
-                            <h3
-                              className={`text-2xl font-bold ${
-                                reminder.completed
-                                  ? "line-through text-slate-400"
-                                  : "text-white"
-                              }`}
-                            >
-                              {reminder.title}
-                            </h3>
-
-                            {reminder.description && (
-                              <p className="text-slate-400 mt-2 whitespace-pre-line">
-                                {reminder.description}
-                              </p>
-                            )}
-
-                            <div className="flex flex-wrap items-center gap-3 mt-4">
-                              <span
-                                className={`text-xs px-3 py-1 rounded-full border ${status.className}`}
-                              >
-                                {status.label}
-                              </span>
-
-                              <span
-                                className={`text-xs px-3 py-1 rounded-full border ${getPriorityClass(
-                                  reminder.priority
-                                )}`}
-                              >
-                                {reminder.priority} Priority
-                              </span>
-
-                              <span className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/10 text-slate-300 flex items-center gap-2">
-                                <Clock3 size={13} />
-                                {formatDateTime(reminder.dueDate)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() =>
-                            handleDeleteReminder(reminder._id)
-                          }
-                          className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-400 transition px-5 py-3 rounded-2xl text-white font-medium"
-                        >
-                          <Trash2 size={18} />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
+                      reminder={reminder}
+                      status={status}
+                      getPriorityClass={getPriorityClass}
+                      formatDateTime={formatDateTime}
+                      handleDeleteReminder={
+                        handleDeleteReminder
+                      }
+                      handleToggleReminder={
+                        handleToggleReminder
+                      }
+                    />
                   )
                 })}
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6">
-            <div className="flex items-center gap-3">
-              <Target className="text-cyan-400" size={24} />
-              <h3 className="text-xl font-bold">
-                Today&apos;s Focus
-              </h3>
-            </div>
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <BottomCard
+            icon={Target}
+            title="Today's Focus"
+            text={`${
+              reminders.filter((item) =>
+                isDueToday(item)
+              ).length
+            } reminder(s) scheduled today.`}
+          />
 
-            <p className="text-slate-400 mt-4">
-              {todayReminders.length > 0
-                ? `You have ${todayReminders.length} reminder(s) scheduled today.`
-                : "No reminders scheduled for today."}
-            </p>
-          </div>
+          <BottomCard
+            icon={Flag}
+            title="High Priority"
+            text={`${
+              reminders.filter(
+                (item) =>
+                  item.priority === "High" &&
+                  !item.completed
+              ).length
+            } high-priority task(s) pending.`}
+          />
 
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6">
-            <div className="flex items-center gap-3">
-              <Flag className="text-red-400" size={24} />
-              <h3 className="text-xl font-bold">
-                High Priority
-              </h3>
-            </div>
-
-            <p className="text-slate-400 mt-4">
-              {highPriorityReminders.length > 0
-                ? `${highPriorityReminders.length} high-priority task(s) need attention.`
-                : "No high-priority pending reminders."}
-            </p>
-          </div>
-
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="text-green-400" size={24} />
-              <h3 className="text-xl font-bold">
-                Completion
-              </h3>
-            </div>
-
-            <p className="text-slate-400 mt-4">
-              {completionRate}% of your reminders are completed.
-            </p>
-          </div>
-        </div>
+          <BottomCard
+            icon={CheckCircle2}
+            title="Completion"
+            text={`${completionRate}% reminders completed.`}
+          />
+        </section>
       </div>
     </DashboardLayout>
+  )
+}
+
+function MiniStat({ title, value, icon: Icon }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm text-slate-400">{title}</h3>
+
+        <Icon size={22} className="text-cyan-400" />
+      </div>
+
+      <p className="text-2xl font-bold text-white md:text-4xl">
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function ReminderCard({
+  reminder,
+  status,
+  getPriorityClass,
+  formatDateTime,
+  handleDeleteReminder,
+  handleToggleReminder,
+}) {
+  return (
+    <div
+      className={`rounded-3xl border p-4 transition md:p-5 ${
+        reminder.completed
+          ? "border-green-400/20 bg-green-500/5"
+          : "border-white/10 bg-white/10 hover:bg-white/15"
+      }`}
+    >
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex items-start gap-3">
+          <button
+            onClick={() =>
+              handleToggleReminder(reminder._id)
+            }
+            className="mt-1"
+          >
+            {reminder.completed ? (
+              <CheckCircle2
+                className="text-green-400"
+                size={24}
+              />
+            ) : (
+              <Circle
+                className="text-slate-400 hover:text-cyan-400"
+                size={24}
+              />
+            )}
+          </button>
+
+          <div className="min-w-0">
+            <h3
+              className={`text-lg font-bold md:text-xl ${
+                reminder.completed
+                  ? "text-slate-400 line-through"
+                  : "text-white"
+              }`}
+            >
+              {reminder.title}
+            </h3>
+
+            {reminder.description && (
+              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-400">
+                {reminder.description}
+              </p>
+            )}
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span
+                className={`rounded-full border px-3 py-1 text-xs ${status.className}`}
+              >
+                {status.label}
+              </span>
+
+              <span
+                className={`rounded-full border px-3 py-1 text-xs ${getPriorityClass(
+                  reminder.priority
+                )}`}
+              >
+                {reminder.priority}
+              </span>
+
+              <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-slate-300">
+                <Clock3 size={12} />
+                {formatDateTime(reminder.dueDate)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() =>
+            handleDeleteReminder(reminder._id)
+          }
+          className="flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-400"
+        >
+          <Trash2 size={16} />
+          Delete
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function BottomCard({ icon: Icon, title, text }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:p-6">
+      <div className="mb-4 flex items-center gap-3">
+        <Icon className="text-cyan-400" size={22} />
+
+        <h3 className="text-lg font-bold text-white">
+          {title}
+        </h3>
+      </div>
+
+      <p className="text-sm leading-6 text-slate-400">
+        {text}
+      </p>
+    </div>
+  )
+}
+
+function AlertBox({ type, text, onClose }) {
+  const styles =
+    type === "error"
+      ? "bg-red-500/10 border-red-400/20 text-red-300"
+      : "bg-green-500/10 border-green-400/20 text-green-300"
+
+  return (
+    <div
+      className={`flex items-center justify-between gap-4 rounded-2xl border px-4 py-4 ${styles}`}
+    >
+      <span className="text-sm md:text-base">
+        {text}
+      </span>
+
+      <button onClick={onClose}>
+        <X size={18} />
+      </button>
+    </div>
   )
 }
 
