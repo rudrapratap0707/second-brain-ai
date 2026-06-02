@@ -7,11 +7,12 @@ import {
   Bot,
   Settings,
   GraduationCap,
+  X,
 } from "lucide-react"
 
 import { Link, useLocation } from "react-router-dom"
 
-function Sidebar() {
+function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const location = useLocation()
 
   const menuItems = [
@@ -57,40 +58,77 @@ function Sidebar() {
     },
   ]
 
+  const closeSidebar = () => {
+    if (setSidebarOpen) {
+      setSidebarOpen(false)
+    }
+  }
+
   return (
-    <aside className="w-72 h-screen bg-white/5 border-r border-white/10 backdrop-blur-xl fixed left-0 top-0 p-6">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-white">
-          Second<span className="text-cyan-400">Brain</span>
-        </h1>
+    <>
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar overlay"
+          onClick={closeSidebar}
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+        />
+      )}
 
-        <p className="text-slate-400 text-sm mt-2">
-          Your AI productivity OS
-        </p>
-      </div>
+      <aside
+        className={`fixed left-0 top-0 z-50 h-screen w-72 border-r border-white/10 bg-slate-950/95 p-5 backdrop-blur-xl transition-transform duration-300 lg:translate-x-0 lg:bg-white/5 lg:p-6 ${
+          sidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-full"
+        }`}
+      >
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white md:text-3xl">
+              Second
+              <span className="text-cyan-400">Brain</span>
+            </h1>
 
-      <nav className="space-y-3">
-        {menuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = location.pathname === item.path
+            <p className="mt-2 text-sm text-slate-400">
+              Your AI productivity OS
+            </p>
+          </div>
 
-          return (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 ${
-                isActive
-                  ? "bg-cyan-500 text-black font-semibold"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <Icon size={22} />
-              <span>{item.name}</span>
-            </Link>
-          )
-        })}
-      </nav>
-    </aside>
+          <button
+            type="button"
+            onClick={closeSidebar}
+            className="rounded-xl bg-white/10 p-2 text-slate-300 lg:hidden"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="space-y-3">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            const isActive =
+              location.pathname === item.path ||
+              location.pathname.startsWith(`${item.path}/`)
+
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                onClick={closeSidebar}
+                className={`flex items-center gap-4 rounded-2xl px-4 py-3 transition-all duration-300 ${
+                  isActive
+                    ? "bg-cyan-500 text-black font-semibold"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <Icon size={22} />
+                <span>{item.name}</span>
+              </Link>
+            )
+          })}
+        </nav>
+      </aside>
+    </>
   )
 }
 
