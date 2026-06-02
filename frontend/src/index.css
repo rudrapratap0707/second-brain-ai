@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+.theme-dark body {
+  background: #070B1A;
+  color: white;
+}
+
+.theme-light body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.font-small {
+  font-size: 14px;
+}
+
+.font-medium {
+  font-size: 16px;
+}
+
+.font-large {
+  font-size: 18px;
+}
+
+.compact-mode main {
+  padding: 1rem !important;
+}
+
+.compact-mode .rounded-\[32px\],
+.compact-mode .rounded-3xl {
+  border-radius: 1rem !important;
+}
+
+.theme-dark .app-bg {
+  background: #070b1a;
+}
+
+.theme-dark .app-text {
+  color: white;
+}
+
+.theme-light .app-bg {
+  background: #f8fafc;
+}
+
+.theme-light .app-text {
+  color: #0f172a;
+}
+
+.theme-light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+.theme-light .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+.theme-light .text-white {
+  color: #0f172a !important;
+}
+
+.theme-light .text-slate-400 {
+  color: #475569 !important;
+}
+
+.theme-light .text-slate-300 {
+  color: #334155 !important;
+}
+
+.theme-light .bg-\[\#070B1A\] {
+  background-color: #f8fafc !important;
+}
+
+.theme-light .bg-\[\#11162A\] {
+  background-color: #e2e8f0 !important;
+}
