@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useState } from "react"
-
 import { Link } from "react-router-dom"
 
 import DashboardLayout from "../layouts/DashboardLayout"
 
-import {
-  getDashboardStats,
-} from "../services/authService"
+import { getDashboardStats } from "../services/authService"
 
 import {
   Brain,
@@ -23,7 +20,6 @@ import {
   Loader2,
   AlertTriangle,
   Activity,
-  Target,
   RefreshCcw,
   Zap,
   CalendarDays,
@@ -51,8 +47,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const user =
-    JSON.parse(localStorage.getItem("user")) || {}
+  const user = JSON.parse(localStorage.getItem("user")) || {}
 
   const fetchDashboard = async () => {
     try {
@@ -79,7 +74,6 @@ function Dashboard() {
       })
     } catch (error) {
       console.log(error)
-
       setError("Failed to load dashboard analytics.")
     } finally {
       setLoading(false)
@@ -104,18 +98,9 @@ function Dashboard() {
   }, [stats])
 
   const workspaceStatus = useMemo(() => {
-    if (totalProductivityItems >= 20) {
-      return "Power User"
-    }
-
-    if (totalProductivityItems >= 10) {
-      return "Growing"
-    }
-
-    if (totalProductivityItems >= 3) {
-      return "Active"
-    }
-
+    if (totalProductivityItems >= 20) return "Power User"
+    if (totalProductivityItems >= 10) return "Growing"
+    if (totalProductivityItems >= 3) return "Active"
     return "Getting Started"
   }, [totalProductivityItems])
 
@@ -170,66 +155,80 @@ function Dashboard() {
   const formatDate = (value) => {
     if (!value) return "No date"
 
-    return new Date(value).toLocaleString()
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) {
+      return "Invalid date"
+    }
+
+    return date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-4">
-              <Brain className="text-cyan-400" size={46} />
+      <div className="page-shell mx-auto max-w-7xl space-y-5 md:space-y-8">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
+          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-cyan-500/20 blur-3xl md:h-72 md:w-72" />
+          <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-purple-500/20 blur-3xl md:h-72 md:w-72" />
 
-              <h1 className="text-5xl font-bold">
-                Welcome back, {user?.name || "User"} 👋
-              </h1>
+          <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-300 md:h-16 md:w-16">
+                <Brain size={34} />
+              </div>
+
+              <div className="min-w-0">
+                <h1 className="text-2xl font-extrabold leading-tight text-white sm:text-3xl md:text-5xl">
+                  Welcome back, {user?.name || "User"} 👋
+                </h1>
+
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-400 md:mt-4 md:text-lg">
+                  Your AI productivity dashboard is ready with live analytics.
+                </p>
+              </div>
             </div>
 
-            <p className="text-slate-400 mt-4 text-lg">
-              Your AI productivity dashboard is ready with live analytics.
-            </p>
+            <button
+              onClick={fetchDashboard}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20 sm:w-fit md:px-6 md:py-4"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                <RefreshCcw size={20} />
+              )}
+              Refresh Analytics
+            </button>
           </div>
+        </section>
 
-          <button
-            onClick={fetchDashboard}
-            className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/20 transition"
-          >
-            {loading ? (
-              <Loader2 className="animate-spin" size={20} />
-            ) : (
-              <RefreshCcw size={20} />
-            )}
-
-            Refresh Analytics
-          </button>
-        </div>
-
-        {/* ERROR */}
         {error && (
-          <div className="bg-red-500/10 border border-red-400/20 text-red-300 rounded-2xl px-5 py-4 mb-8 flex items-center gap-3">
+          <div className="flex flex-col gap-3 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-4 text-red-300 sm:flex-row sm:items-center md:px-5">
             <AlertTriangle size={20} />
-
-            <span>{error}</span>
+            <span className="text-sm md:text-base">{error}</span>
           </div>
         )}
 
-        {/* LOADING */}
         {loading && (
-          <div className="bg-white/10 border border-white/10 rounded-3xl p-6 mb-8 flex items-center gap-3 text-cyan-300">
+          <div className="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 text-cyan-300 md:p-6">
             <Loader2 className="animate-spin" size={24} />
-
-            <span>Loading dashboard analytics...</span>
+            <span className="text-sm md:text-base">
+              Loading dashboard analytics...
+            </span>
           </div>
         )}
 
-        {/* MAIN STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Total Notes"
             value={stats.totalNotes}
-            icon={<FileText size={30} />}
+            icon={<FileText size={28} />}
             color="text-cyan-300"
             description="Saved ideas and study notes"
             link="/notes"
@@ -238,7 +237,7 @@ function Dashboard() {
           <StatCard
             title="Uploaded Files"
             value={stats.totalFiles}
-            icon={<FolderOpen size={30} />}
+            icon={<FolderOpen size={28} />}
             color="text-purple-300"
             description="PDFs and documents"
             link="/files"
@@ -247,7 +246,7 @@ function Dashboard() {
           <StatCard
             title="AI Chats"
             value={stats.totalChats}
-            icon={<MessageCircle size={30} />}
+            icon={<MessageCircle size={28} />}
             color="text-green-300"
             description="Persistent AI conversations"
             link="/assistant"
@@ -256,19 +255,18 @@ function Dashboard() {
           <StatCard
             title="Workspace"
             value={workspaceStatus}
-            icon={<Activity size={30} />}
+            icon={<Activity size={28} />}
             color="text-yellow-300"
             description="Overall activity status"
             link="/dashboard"
           />
-        </div>
+        </section>
 
-        {/* PRODUCTIVITY STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Pending Reminders"
             value={stats.pendingReminders}
-            icon={<Bell size={30} />}
+            icon={<Bell size={28} />}
             color="text-orange-300"
             description="Tasks waiting for action"
             link="/reminders"
@@ -277,7 +275,7 @@ function Dashboard() {
           <StatCard
             title="Completed Tasks"
             value={stats.completedReminders}
-            icon={<CheckCircle2 size={30} />}
+            icon={<CheckCircle2 size={28} />}
             color="text-green-300"
             description="Finished reminders"
             link="/reminders"
@@ -286,7 +284,7 @@ function Dashboard() {
           <StatCard
             title="Completion Rate"
             value={`${stats.completionRate}%`}
-            icon={<BarChart3 size={30} />}
+            icon={<BarChart3 size={28} />}
             color="text-cyan-300"
             description="Reminder completion progress"
             link="/reminders"
@@ -295,71 +293,70 @@ function Dashboard() {
           <StatCard
             title="Average Mood"
             value={`${stats.averageMoodScore}/5`}
-            icon={<Smile size={30} />}
+            icon={<Smile size={28} />}
             color={getMoodColor(Number(stats.averageMoodScore))}
             description="Emotional trend score"
             link="/mood"
           />
-        </div>
+        </section>
 
-        {/* INSIGHTS + MOOD */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-6 mb-10">
-          <div className="bg-cyan-500/10 border border-cyan-400/20 rounded-[32px] p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Sparkles className="text-cyan-300" size={30} />
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-3xl border border-cyan-400/20 bg-cyan-500/10 p-4 md:rounded-[32px] md:p-8">
+            <div className="mb-5 flex items-center gap-3 md:mb-6">
+              <Sparkles className="text-cyan-300" size={28} />
 
-              <h2 className="text-3xl font-bold text-cyan-300">
+              <h2 className="text-xl font-bold text-cyan-300 md:text-3xl">
                 AI Productivity Insight
               </h2>
             </div>
 
-            <p className="text-slate-200 text-lg leading-relaxed">
+            <p className="text-sm leading-7 text-slate-200 md:text-lg">
               {getProductivityInsight()}
             </p>
 
-            <div className="mt-8 bg-black/20 border border-white/5 rounded-3xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-slate-400">
+            <div className="mt-6 rounded-3xl border border-white/5 bg-black/20 p-4 md:mt-8 md:p-6">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm text-slate-400 md:text-base">
                   Productivity Completion
                 </span>
 
-                <span className="text-3xl font-bold text-cyan-300">
+                <span className="text-2xl font-bold text-cyan-300 md:text-3xl">
                   {stats.completionRate}%
                 </span>
               </div>
 
-              <div className="w-full h-4 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-3 w-full overflow-hidden rounded-full bg-white/10 md:h-4">
                 <div
-                  className="h-full bg-cyan-400 rounded-full transition-all"
+                  className="h-full rounded-full bg-cyan-400 transition-all"
                   style={{
                     width: `${stats.completionRate || 0}%`,
                   }}
-                ></div>
+                />
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-            <div className="flex items-center gap-3 mb-6">
-              <Smile className="text-purple-300" size={30} />
+          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
+            <div className="mb-5 flex items-center gap-3 md:mb-6">
+              <Smile className="text-purple-300" size={28} />
 
-              <h2 className="text-3xl font-bold">
+              <h2 className="text-xl font-bold text-white md:text-3xl">
                 Latest Mood
               </h2>
             </div>
 
             {stats.latestMood ? (
               <div>
-                <div className="text-7xl mb-5">
+                <div className="mb-4 text-6xl md:mb-5 md:text-7xl">
                   {getMoodEmoji(moodLabel)}
                 </div>
 
-                <h3 className="text-4xl font-bold">
+                <h3 className="text-3xl font-bold text-white md:text-4xl">
                   {moodLabel}
                 </h3>
 
                 <p
-                  className={`text-2xl font-bold mt-3 ${getMoodColor(
+                  className={`mt-3 text-xl font-bold md:text-2xl ${getMoodColor(
                     Number(moodScore)
                   )}`}
                 >
@@ -367,45 +364,44 @@ function Dashboard() {
                 </p>
 
                 {stats.latestMood.note && (
-                  <p className="text-slate-300 mt-5 whitespace-pre-line">
+                  <p className="mt-5 whitespace-pre-line text-sm text-slate-300 md:text-base">
                     {stats.latestMood.note}
                   </p>
                 )}
 
-                <p className="text-slate-500 text-sm mt-5 flex items-center gap-2">
+                <p className="mt-5 flex items-center gap-2 text-sm text-slate-500">
                   <Clock3 size={16} />
                   {formatDate(stats.latestMood.createdAt)}
                 </p>
               </div>
             ) : (
-              <div className="border border-dashed border-white/20 rounded-3xl p-10 text-center text-slate-400">
-                <Smile size={60} className="mx-auto text-slate-500 mb-5" />
+              <div className="rounded-3xl border border-dashed border-white/20 p-6 text-center text-slate-400 md:p-10">
+                <Smile size={54} className="mx-auto mb-5 text-slate-500" />
 
-                <h3 className="text-2xl font-bold text-white mb-3">
+                <h3 className="mb-3 text-xl font-bold text-white md:text-2xl">
                   No Mood Logged
                 </h3>
 
-                <p>
+                <p className="text-sm md:text-base">
                   Track your mood to unlock emotional insights.
                 </p>
 
                 <Link
                   to="/mood"
-                  className="inline-flex mt-6 px-5 py-3 rounded-2xl bg-cyan-500 text-black font-bold"
+                  className="mt-6 inline-flex rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-black md:text-base"
                 >
                   Add Mood
                 </Link>
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        {/* QUICK ACTIONS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <QuickAction
             title="Open Smart Notes"
             description="Create notes, save ideas, and summarize them with AI."
-            icon={<FileText size={30} />}
+            icon={<FileText size={28} />}
             link="/notes"
             color="cyan"
           />
@@ -413,7 +409,7 @@ function Dashboard() {
           <QuickAction
             title="Open AI Assistant"
             description="Continue old chats or start a memory-based conversation."
-            icon={<MessageCircle size={30} />}
+            icon={<MessageCircle size={28} />}
             link="/assistant"
             color="purple"
           />
@@ -421,7 +417,7 @@ function Dashboard() {
           <QuickAction
             title="Upload File"
             description="Upload PDFs and documents for AI memory."
-            icon={<FolderOpen size={30} />}
+            icon={<FolderOpen size={28} />}
             link="/files"
             color="green"
           />
@@ -429,14 +425,13 @@ function Dashboard() {
           <QuickAction
             title="Add Reminder"
             description="Plan tasks, deadlines, and priority work."
-            icon={<Bell size={30} />}
+            icon={<Bell size={28} />}
             link="/reminders"
             color="orange"
           />
-        </div>
+        </section>
 
-        {/* RECENT ACTIVITY */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <ActivityCard
             title="Recent Notes"
             icon={<FileText className="text-cyan-400" size={28} />}
@@ -445,17 +440,17 @@ function Dashboard() {
             {recentActivity.recentNotes?.map((note) => (
               <div
                 key={note._id}
-                className="bg-white/10 border border-white/10 rounded-3xl p-5"
+                className="rounded-3xl border border-white/10 bg-white/10 p-4 md:p-5"
               >
-                <h3 className="text-xl font-bold line-clamp-1">
+                <h3 className="line-clamp-1 text-lg font-bold text-white md:text-xl">
                   {note.title}
                 </h3>
 
-                <p className="text-slate-400 mt-2 line-clamp-2">
+                <p className="mt-2 line-clamp-2 text-sm text-slate-400 md:text-base">
                   {note.content}
                 </p>
 
-                <p className="text-slate-500 text-sm mt-3">
+                <p className="mt-3 text-sm text-slate-500">
                   {formatDate(note.createdAt)}
                 </p>
               </div>
@@ -470,35 +465,34 @@ function Dashboard() {
             {recentActivity.recentFiles?.map((file) => (
               <div
                 key={file._id}
-                className="bg-white/10 border border-white/10 rounded-3xl p-5"
+                className="rounded-3xl border border-white/10 bg-white/10 p-4 md:p-5"
               >
-                <h3 className="text-xl font-bold break-all line-clamp-1">
+                <h3 className="line-clamp-1 break-all text-lg font-bold text-white md:text-xl">
                   {file.originalName}
                 </h3>
 
-                <p className="text-slate-400 mt-2">
+                <p className="mt-2 text-sm text-slate-400 md:text-base">
                   {file.mimeType}
                 </p>
 
-                <p className="text-slate-500 text-sm mt-3">
+                <p className="mt-3 text-sm text-slate-500">
                   {formatDate(file.createdAt)}
                 </p>
               </div>
             ))}
           </ActivityCard>
-        </div>
+        </section>
 
-        {/* AI CONTROL CENTER */}
-        <div className="mt-10 bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-          <div className="flex items-center gap-3 mb-6">
-            <Zap className="text-yellow-300" size={30} />
+        <section className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
+          <div className="mb-6 flex items-center gap-3">
+            <Zap className="text-yellow-300" size={28} />
 
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-xl font-bold text-white md:text-3xl">
               SecondBrain Control Center
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <ControlPoint
               icon={<Brain size={28} />}
               title="AI Memory"
@@ -517,53 +511,40 @@ function Dashboard() {
               text="Use reminders and mood tracking to plan better study sessions."
             />
           </div>
-        </div>
+        </section>
       </div>
     </DashboardLayout>
   )
 }
 
-function StatCard({
-  title,
-  value,
-  icon,
-  color,
-  description,
-  link,
-}) {
+function StatCard({ title, value, icon, color, description, link }) {
   return (
     <Link
       to={link}
-      className="bg-white/10 border border-white/10 rounded-[32px] p-6 backdrop-blur-xl hover:bg-white/15 transition group"
+      className="group rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition hover:bg-white/15 md:rounded-[32px] md:p-6"
     >
-      <div className="flex items-center justify-between">
-        <h3 className="text-slate-400 font-medium">
+      <div className="flex items-start justify-between gap-4">
+        <h3 className="text-sm font-medium text-slate-400 md:text-base">
           {title}
         </h3>
 
-        <div className={`${color} group-hover:scale-110 transition`}>
+        <div className={`${color} transition group-hover:scale-110`}>
           {icon}
         </div>
       </div>
 
-      <p className="text-5xl font-bold mt-5">
+      <p className="mt-4 text-3xl font-bold text-white md:mt-5 md:text-5xl">
         {value}
       </p>
 
-      <p className="text-slate-500 mt-3">
+      <p className="mt-3 text-sm leading-6 text-slate-500">
         {description}
       </p>
     </Link>
   )
 }
 
-function QuickAction({
-  title,
-  description,
-  icon,
-  link,
-  color,
-}) {
+function QuickAction({ title, description, icon, link, color }) {
   const colorClasses = {
     cyan: "bg-cyan-500/10 border-cyan-400/20 text-cyan-300",
     purple: "bg-purple-500/10 border-purple-400/20 text-purple-300",
@@ -574,21 +555,19 @@ function QuickAction({
   return (
     <Link
       to={link}
-      className={`rounded-[32px] p-6 border hover:scale-[1.02] transition ${colorClasses[color]}`}
+      className={`rounded-3xl border p-4 transition hover:scale-[1.02] md:rounded-[32px] md:p-6 ${colorClasses[color]}`}
     >
-      <div className="mb-5">
-        {icon}
-      </div>
+      <div className="mb-4 md:mb-5">{icon}</div>
 
-      <h2 className="text-2xl font-bold">
+      <h2 className="text-xl font-bold md:text-2xl">
         {title}
       </h2>
 
-      <p className="text-slate-300 mt-3">
+      <p className="mt-3 text-sm leading-6 text-slate-300">
         {description}
       </p>
 
-      <div className="flex items-center gap-2 mt-6 font-semibold">
+      <div className="mt-5 flex items-center gap-2 text-sm font-semibold md:mt-6">
         <span>Open</span>
         <ArrowRight size={18} />
       </div>
@@ -596,23 +575,17 @@ function QuickAction({
   )
 }
 
-function ActivityCard({
-  title,
-  icon,
-  emptyText,
-  children,
-}) {
-  const hasChildren =
-    Array.isArray(children)
-      ? children.length > 0
-      : Boolean(children)
+function ActivityCard({ title, icon, emptyText, children }) {
+  const hasChildren = Array.isArray(children)
+    ? children.length > 0
+    : Boolean(children)
 
   return (
-    <div className="bg-white/10 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
+      <div className="mb-5 flex items-center gap-3 md:mb-6">
         {icon}
 
-        <h2 className="text-3xl font-bold">
+        <h2 className="text-xl font-bold text-white md:text-3xl">
           {title}
         </h2>
       </div>
@@ -621,7 +594,7 @@ function ActivityCard({
         {hasChildren ? (
           children
         ) : (
-          <div className="border border-dashed border-white/20 rounded-3xl p-10 text-center text-slate-400">
+          <div className="rounded-3xl border border-dashed border-white/20 p-6 text-center text-sm text-slate-400 md:p-10 md:text-base">
             {emptyText}
           </div>
         )}
@@ -630,22 +603,16 @@ function ActivityCard({
   )
 }
 
-function ControlPoint({
-  icon,
-  title,
-  text,
-}) {
+function ControlPoint({ icon, title, text }) {
   return (
-    <div className="bg-black/20 border border-white/5 rounded-3xl p-6">
-      <div className="text-cyan-400 mb-4">
-        {icon}
-      </div>
+    <div className="rounded-3xl border border-white/5 bg-black/20 p-4 md:p-6">
+      <div className="mb-4 text-cyan-400">{icon}</div>
 
-      <h3 className="text-2xl font-bold">
+      <h3 className="text-xl font-bold text-white md:text-2xl">
         {title}
       </h3>
 
-      <p className="text-slate-400 mt-3">
+      <p className="mt-3 text-sm leading-6 text-slate-400">
         {text}
       </p>
     </div>
