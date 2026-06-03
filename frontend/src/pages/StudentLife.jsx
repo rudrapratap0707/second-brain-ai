@@ -341,14 +341,12 @@ function StudentLife() {
     return (
       <DashboardLayout>
         <div className="flex min-h-[75vh] items-center justify-center px-4 sm:px-6">
-          <div className="w-full max-w-sm rounded-2xl border border-white/5 bg-white/5 p-5 text-center backdrop-blur-lg sm:max-w-md sm:rounded-3xl sm:border-white/10 sm:bg-white/10 sm:p-8">
-            <Loader2 className="mx-auto animate-spin text-cyan-400" size={36} />
-
-            <h2 className="mt-4 text-lg font-bold text-white sm:mt-5 sm:text-xl md:text-2xl">
+          <div className="w-full max-w-sm rounded-2xl border border-white/5 bg-white/5 p-6 text-center backdrop-blur-lg sm:max-w-md sm:p-8">
+            <Loader2 className="mx-auto animate-spin text-cyan-400" size={32} />
+            <h2 className="mt-4 text-base font-bold text-white sm:text-lg md:text-xl">
               Loading Student Life OS
             </h2>
-
-            <p className="mt-2 text-xs text-slate-400 sm:text-sm md:text-base">
+            <p className="mt-1.5 text-xs text-slate-400 sm:text-sm">
               Fetching real student data from backend...
             </p>
           </div>
@@ -360,25 +358,22 @@ function StudentLife() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 sm:rounded-3xl sm:p-6 md:p-8">
-          <div className="flex flex-col gap-3 text-red-300 sm:flex-row sm:items-center sm:gap-4">
-            <AlertTriangle size={26} className="shrink-0" />
-
-            <div>
-              <h2 className="text-lg font-bold sm:text-xl md:text-2xl">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-red-500/20 bg-red-500/10 p-4 sm:p-6 md:p-8">
+          <div className="flex flex-col gap-3 text-red-300 sm:flex-row sm:items-start sm:gap-4">
+            <AlertTriangle size={24} className="shrink-0 mt-0.5 text-red-400" />
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base font-bold sm:text-lg md:text-xl">
                 Student Life OS failed to load
               </h2>
-
-              <p className="mt-1 text-xs text-red-200/80 sm:text-sm md:text-base">
+              <p className="mt-1 text-xs text-red-200/80 sm:text-sm leading-relaxed">
                 {error}
               </p>
             </div>
           </div>
-
           <button
             type="button"
             onClick={fetchDashboard}
-            className="mt-5 rounded-xl bg-red-400 px-4 py-2.5 text-xs font-semibold text-black transition hover:bg-red-300 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-sm md:text-base"
+            className="mt-4 rounded-xl bg-red-500 px-4 py-2 text-xs font-bold text-black transition hover:bg-red-400 active:scale-95 sm:text-sm"
           >
             Retry
           </button>
@@ -389,43 +384,44 @@ function StudentLife() {
 
   return (
     <DashboardLayout>
-      <div className="page-shell space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="w-full mx-auto max-w-[1600px] space-y-4 px-1 py-2 sm:space-y-6 sm:px-4 md:space-y-8 md:py-4">
+        
+        {/* Banner Section */}
         <HeroSection profile={profile} />
 
         {/* Analytics Statistics Grid */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+        <section className="grid grid-cols-1 gap-3.5 xs:grid-cols-2 lg:grid-cols-4 sm:gap-4 md:gap-5">
           {statCards.map((card) => (
             <StatCard key={card.title} card={card} />
           ))}
         </section>
 
         {/* Data Integration & Principles Grid */}
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+        <section className="grid grid-cols-1 gap-3.5 xs:grid-cols-2 lg:grid-cols-4 sm:gap-4 md:gap-5">
           {dataRules.map((rule) => (
             <RuleCard key={rule.title} rule={rule} />
           ))}
         </section>
 
         {/* Main Operational Core Modules Grid */}
-        <section className="rounded-2xl border border-white/5 bg-white/5 p-3.5 backdrop-blur-lg sm:rounded-3xl sm:border-white/10 sm:bg-white/10 sm:p-6 md:p-8">
-          <div className="mb-5 flex flex-col gap-3 sm:mb-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-white sm:text-xl md:text-2xl">
+        <section className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-6 md:p-8">
+          <div className="mb-5 flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between border-b border-white/[0.04] pb-5">
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-white sm:text-xl md:text-2xl tracking-tight">
                 Student Life Modules
               </h2>
-
-              <p className="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm md:text-base">
+              <p className="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm">
                 Each module is connected with backend APIs and real MongoDB data.
               </p>
             </div>
 
-            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-[11px] text-slate-300 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-xs md:text-sm">
-              <PlugZap size={16} className="shrink-0 text-cyan-300" />
-              <span className="truncate">MongoDB dashboard API connected</span>
+            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-xl bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:px-4 sm:py-2">
+              <PlugZap size={14} className="shrink-0 text-cyan-400 animate-pulse" />
+              <span className="truncate text-[11px] sm:text-xs font-medium">MongoDB dashboard API connected</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 sm:gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-5">
             {modules.map((module) => (
               <ModuleCard key={module.backendKey} module={module} />
             ))}
@@ -433,18 +429,18 @@ function StudentLife() {
         </section>
 
         {/* Dynamic Aggregated Upcoming Tasks & Schedules lists */}
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 sm:gap-5">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 md:gap-5">
           <DataListCard
             title="Upcoming Exams"
             emptyText="No upcoming exams found."
             items={upcoming?.exams || []}
             renderItem={(exam) => (
-              <>
-                <h3 className="text-sm font-bold text-white sm:text-base">{exam.subject}</h3>
-                <p className="mt-0.5 text-xs text-slate-400 sm:text-sm">
+              <div className="min-w-0 w-full">
+                <h3 className="truncate text-xs font-bold text-white sm:text-sm">{exam.subject}</h3>
+                <p className="mt-1 text-[11px] text-slate-400 sm:text-xs font-medium">
                   {formatDate(exam.examDate)}
                 </p>
-              </>
+              </div>
             )}
           />
 
@@ -453,12 +449,17 @@ function StudentLife() {
             emptyText="No active targets found."
             items={upcoming?.targets || []}
             renderItem={(target) => (
-              <>
-                <h3 className="text-sm font-bold text-white sm:text-base">{target.title}</h3>
-                <p className="mt-0.5 text-xs text-slate-400 sm:text-sm">
-                  Progress: {target.progress || 0}%
-                </p>
-              </>
+              <div className="min-w-0 w-full">
+                <h3 className="truncate text-xs font-bold text-white sm:text-sm">{target.title}</h3>
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="h-1.5 flex-1 rounded-full bg-white/5 overflow-hidden">
+                    <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${Math.min(target.progress || 0, 100)}%` }} />
+                  </div>
+                  <span className="text-[10px] sm:text-xs font-semibold text-cyan-400 shrink-0">
+                    {target.progress || 0}%
+                  </span>
+                </div>
+              </div>
             )}
           />
 
@@ -467,24 +468,24 @@ function StudentLife() {
             emptyText="No pending checkpoints found."
             items={upcoming?.checkpoints || []}
             renderItem={(checkpoint) => (
-              <>
-                <h3 className="text-sm font-bold text-white sm:text-base">{checkpoint.title}</h3>
-                <p className="mt-0.5 text-xs text-slate-400 sm:text-sm">
-                  {checkpoint.status}
-                </p>
-              </>
+              <div className="min-w-0 w-full flex items-center justify-between gap-3">
+                <h3 className="truncate text-xs font-bold text-white sm:text-sm">{checkpoint.title}</h3>
+                <span className="shrink-0 px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20 text-[10px] font-medium text-amber-300">
+                  {checkpoint.status || "Pending"}
+                </span>
+              </div>
             )}
           />
         </section>
 
         {/* Database Modeling Structure & Predictive Analysis Engine Panel */}
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 sm:gap-5">
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 md:gap-5">
           <InfoPanel
             icon={Layers}
             title="Backend Models Plan"
             subtitle="These collections power the real data."
           >
-            <div className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               {backendPlan.map((item) => (
                 <BackendPlanItem key={item.title} item={item} />
               ))}
@@ -496,30 +497,29 @@ function StudentLife() {
             title="AI Study Engine"
             subtitle="AI actions will work only on real saved data."
           >
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-3">
               {aiCapabilities.map((capability) => (
                 <div
                   key={capability}
-                  className="flex gap-2.5 rounded-xl border border-white/5 bg-black/10 p-3 sm:rounded-2xl sm:border-white/10 sm:bg-black/20 sm:p-4 sm:gap-4"
+                  className="flex gap-3 rounded-xl border border-white/[0.04] bg-white/[0.01] p-3 sm:p-4"
                 >
-                  <div className="mt-0.5 shrink-0 text-cyan-300">
-                    <CheckCircle2 size={16} className="sm:w-5 sm:h-5" />
+                  <div className="mt-0.5 shrink-0 text-cyan-400">
+                    <CheckCircle2 size={14} className="sm:w-4 sm:h-4" />
                   </div>
-
-                  <p className="text-xs leading-relaxed text-slate-300 sm:text-sm sm:leading-6">
+                  <p className="text-xs leading-relaxed text-slate-300">
                     {capability}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 rounded-xl border border-cyan-400/10 bg-cyan-400/5 p-3.5 sm:mt-5 sm:rounded-2xl sm:border-cyan-400/20 sm:bg-cyan-400/10 sm:p-5">
-              <div className="flex items-center gap-2.5 text-cyan-200">
-                <Activity size={18} className="shrink-0 sm:w-5 sm:h-5" />
-                <h3 className="text-sm font-bold sm:text-base">Next Development Phase</h3>
+            <div className="mt-4 rounded-xl border border-cyan-500/10 bg-cyan-500/[0.02] p-4 sm:mt-5">
+              <div className="flex items-center gap-2 text-cyan-300">
+                <Activity size={14} className="shrink-0 text-cyan-400" />
+                <h3 className="text-xs font-bold sm:text-sm">Next Development Phase</h3>
               </div>
 
-              <p className="mt-2 text-xs leading-relaxed text-slate-300 sm:mt-3 sm:text-sm sm:leading-6">
+              <p className="mt-2 text-xs leading-relaxed text-slate-400">
                 Next upgrades can include real AI timetable generation, OCR document reading,
                 notes summarization, revision reminders, and skill-based study recommendations.
               </p>
@@ -533,27 +533,27 @@ function StudentLife() {
 
 function HeroSection({ profile }) {
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-lg sm:rounded-3xl sm:border-white/10 sm:bg-white/10 sm:p-6 md:p-8">
-      <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-cyan-500/15 blur-3xl sm:h-56 sm:w-56 md:h-72 md:w-72" />
-      <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-violet-500/15 blur-3xl sm:h-56 sm:w-56 md:h-72 md:w-72" />
+    <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-6 md:p-8">
+      <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between sm:gap-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4 md:gap-5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-black shadow-md shadow-cyan-500/10 sm:h-14 sm:w-14 sm:rounded-2xl md:h-16 md:w-16">
-            <GraduationCap size={22} className="sm:w-7 sm:h-7 md:w-8 md:h-8" />
+      <div className="relative z-10 flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3.5 sm:flex-row sm:items-start sm:gap-4 md:gap-5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-black shadow-lg shadow-cyan-500/10 sm:h-14 sm:w-14 sm:rounded-2xl">
+            <GraduationCap size={22} className="sm:size-6" />
           </div>
 
           <div className="min-w-0">
-            <div className="mb-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/5 px-2.5 py-1 text-[11px] font-semibold text-cyan-300 sm:px-3 sm:py-1.5 sm:text-xs md:text-sm">
-              <ShieldCheck size={14} className="shrink-0" />
-              <span className="truncate">Backend connected dashboard</span>
+            <div className="mb-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-2.5 py-0.5 text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
+              <ShieldCheck size={12} className="shrink-0" />
+              <span className="truncate">Live Production Environment</span>
             </div>
 
-            <h1 className="text-xl font-extrabold leading-tight text-white sm:text-2xl md:text-4xl lg:text-5xl">
+            <h1 className="text-xl font-black leading-tight text-white sm:text-2xl md:text-3xl lg:text-4xl tracking-tight">
               Student Life OS
             </h1>
 
-            <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-300 sm:text-sm sm:leading-6 md:mt-3">
+            <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-400 sm:text-sm">
               A complete AI-powered academic life management system for college
               students. This dashboard uses backend data only and avoids fake
               static statistics.
@@ -561,13 +561,12 @@ function HeroSection({ profile }) {
           </div>
         </div>
 
-        <div className="w-full rounded-xl border border-white/5 bg-black/10 p-3 sm:rounded-2xl sm:border-white/10 sm:p-4 lg:w-auto lg:min-w-[240px]">
-          <div className="flex items-center gap-2.5 text-slate-300">
-            <Construction size={18} className="shrink-0 text-yellow-300 sm:w-5 sm:h-5" />
-
-            <div className="min-w-0">
-              <p className="text-[11px] text-slate-400 sm:text-xs">Current Profile</p>
-              <p className="truncate text-xs font-semibold text-white sm:text-sm">
+        <div className="w-full rounded-xl border border-white/5 bg-white/[0.02] p-3 sm:p-4 lg:w-auto lg:min-w-[260px] shrink-0">
+          <div className="flex items-center gap-3 text-slate-300">
+            <Construction size={16} className="shrink-0 text-amber-400" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Current Profile</p>
+              <p className="truncate text-xs font-semibold text-white sm:text-sm mt-0.5">
                 {profile?.courseName || "Profile not completed"}
               </p>
             </div>
@@ -582,18 +581,18 @@ function StatCard({ card }) {
   const Icon = card.icon
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/5 p-3.5 backdrop-blur-lg sm:rounded-3xl sm:border-white/10 sm:p-5 md:p-6">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-300 sm:mb-4 sm:h-11 sm:w-11 sm:rounded-2xl md:mb-5 md:h-12 md:w-12">
-        <Icon size={18} className="sm:w-6 sm:h-6" />
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md hover:border-white/10 transition-colors">
+      <div className="mb-3.5 flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+        <Icon size={16} />
       </div>
 
-      <p className="text-xs text-slate-400 sm:text-sm">{card.title}</p>
+      <p className="text-xs font-medium text-slate-400">{card.title}</p>
 
-      <h2 className="mt-1 text-xl font-bold text-white sm:text-2xl md:text-3xl">
+      <h2 className="mt-1 text-xl font-bold text-white sm:text-2xl md:text-3xl tracking-tight">
         {card.value}
       </h2>
 
-      <p className="mt-2 text-xs leading-relaxed text-slate-500 sm:text-sm">
+      <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
         {card.description}
       </p>
     </div>
@@ -604,16 +603,16 @@ function RuleCard({ rule }) {
   const Icon = rule.icon
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/5 p-3.5 backdrop-blur-lg sm:rounded-3xl sm:border-white/10 sm:p-5 md:p-6">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-300 sm:mb-4 sm:h-11 sm:w-11 sm:rounded-2xl md:mb-5 md:h-12 md:w-12">
-        <Icon size={18} className="sm:w-6 sm:h-6" />
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
+      <div className="mb-3.5 flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+        <Icon size={16} />
       </div>
 
-      <h2 className="text-sm font-bold text-white sm:text-base md:text-lg">
+      <h2 className="text-xs font-bold text-white sm:text-sm">
         {rule.title}
       </h2>
 
-      <p className="mt-2 text-xs leading-relaxed text-slate-400 sm:text-sm sm:leading-6">
+      <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
         {rule.text}
       </p>
     </div>
@@ -624,44 +623,45 @@ function ModuleCard({ module }) {
   const Icon = module.icon
 
   return (
-    <article className="group relative flex min-h-full flex-col overflow-hidden rounded-2xl border border-white/5 bg-black/10 p-3.5 transition duration-300 hover:bg-white/5 sm:rounded-3xl sm:border-white/10 sm:bg-black/20 sm:p-5 md:p-6 md:hover:-translate-y-1 md:hover:bg-white/10">
-      <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-cyan-500/5 blur-2xl transition group-hover:bg-cyan-500/10 sm:h-32 sm:w-32" />
+    <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] p-4 transition-all duration-300 hover:bg-white/[0.03] hover:border-white/10 sm:p-5 md:hover:-translate-y-0.5">
+      <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-cyan-500/[0.02] blur-2xl pointer-events-none transition group-hover:bg-cyan-500/5" />
 
-      <div className="relative z-10 flex h-full flex-col">
-        <div className="flex items-start justify-between gap-2.5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-300 sm:h-12 sm:w-12 sm:rounded-2xl md:h-14 md:w-14">
-            <Icon size={20} className="sm:w-6 sm:h-6 md:w-7 md:h-7" />
+      <div className="relative z-10 flex flex-col h-full justify-between">
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400 sm:h-10 sm:w-10">
+              <Icon size={18} />
+            </div>
+
+            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 tracking-wide uppercase">
+              {module.status}
+            </span>
           </div>
 
-          <span className="rounded-full border border-green-400/20 bg-green-400/10 px-2 py-0.5 text-[10px] font-semibold text-green-200 sm:px-3 sm:py-1 sm:text-xs">
-            {module.status}
-          </span>
-        </div>
+          <h3 className="mt-3 text-sm font-bold text-white sm:text-base tracking-tight">
+            {module.title}
+          </h3>
 
-        <h3 className="mt-3.5 text-base font-bold text-white sm:mt-4 md:mt-5 md:text-xl">
-          {module.title}
-        </h3>
-
-        <p className="mt-2 text-xs leading-relaxed text-slate-400 sm:text-sm sm:leading-6 lg:min-h-[72px]">
-          {module.description}
-        </p>
-
-        <div className="mt-3.5 rounded-xl border border-white/5 bg-white/5 p-3 sm:mt-4 sm:rounded-2xl sm:border-white/10 sm:p-4 md:mt-5">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">
-            Backend Data
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400 line-clamp-3 lg:line-clamp-none lg:min-h-[64px]">
+            {module.description}
           </p>
 
-          <p className="mt-1 text-xs leading-relaxed text-slate-300 sm:text-sm sm:leading-6">
-            {module.futureData}
-          </p>
+          <div className="mt-3 rounded-xl border border-white/5 bg-black/20 p-3">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+              Backend Properties
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-300 line-clamp-2">
+              {module.futureData}
+            </p>
+          </div>
         </div>
 
         <Link
           to={module.route}
-          className="mt-4 flex w-full items-center justify-between rounded-xl bg-cyan-500 px-3.5 py-2.5 text-left text-xs font-bold text-black transition active:scale-[0.98] sm:mt-5 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm lg:hover:scale-[1.02]"
+          className="mt-4 flex w-full items-center justify-between rounded-xl bg-cyan-500 px-3.5 py-2.5 text-left text-xs font-bold text-black shadow-md shadow-cyan-500/5 transition hover:bg-cyan-400 active:scale-[0.98]"
         >
           <span>Open Module</span>
-          <ArrowRight size={16} className="shrink-0 sm:w-4 sm:h-4" />
+          <ArrowRight size={14} className="shrink-0 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
     </article>
@@ -670,25 +670,25 @@ function ModuleCard({ module }) {
 
 function InfoPanel({ icon: Icon, title, subtitle, children }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/5 p-3.5 backdrop-blur-lg sm:rounded-3xl sm:border-white/10 sm:bg-white/10 sm:p-6 md:p-7 text-left">
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-6">
       <SectionHeader icon={Icon} title={title} subtitle={subtitle} />
-      {children}
+      <div className="mt-4">{children}</div>
     </div>
   )
 }
 
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (
-    <div className="mb-4 flex items-start gap-2.5 sm:mb-5 md:mb-6 md:items-center">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-300 sm:h-11 sm:w-11 sm:rounded-2xl md:h-12 md:w-12">
-        <Icon size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
+    <div className="flex items-center gap-3 border-b border-white/[0.04] pb-4 w-full">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+        <Icon size={16} />
       </div>
 
-      <div className="min-w-0">
-        <h2 className="truncate text-base font-bold text-white sm:text-xl md:text-2xl">
+      <div className="min-w-0 flex-1">
+        <h2 className="truncate text-sm font-bold text-white sm:text-base tracking-tight">
           {title}
         </h2>
-        <p className="truncate text-xs text-slate-400 sm:text-sm">{subtitle}</p>
+        <p className="truncate text-xs text-slate-500 mt-0.5">{subtitle}</p>
       </div>
     </div>
   )
@@ -698,14 +698,14 @@ function BackendPlanItem({ item }) {
   const Icon = item.icon
 
   return (
-    <div className="flex gap-2.5 rounded-xl border border-white/5 bg-black/10 p-3 sm:rounded-2xl sm:border-white/10 sm:bg-black/20 sm:p-4 sm:gap-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5 text-cyan-300 sm:h-11 sm:w-11 sm:rounded-xl">
-        <Icon size={18} className="sm:w-5 sm:h-5" />
+    <div className="flex gap-3 rounded-xl border border-white/[0.04] bg-white/[0.01] p-3 sm:p-4 w-full">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-cyan-400">
+        <Icon size={14} />
       </div>
 
-      <div className="min-w-0">
-        <h3 className="text-sm font-bold text-white sm:text-base">{item.title}</h3>
-        <p className="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm sm:leading-6">
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate text-xs font-bold text-white sm:text-sm">{item.title}</h3>
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           {item.description}
         </p>
       </div>
@@ -715,23 +715,25 @@ function BackendPlanItem({ item }) {
 
 function DataListCard({ title, emptyText, items, renderItem }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/5 p-3.5 backdrop-blur-lg sm:rounded-3xl sm:border-white/10 sm:bg-white/10 sm:p-6 md:p-7 text-left">
-      <h2 className="text-base font-bold text-white sm:text-xl md:text-2xl">
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md flex flex-col min-w-0 w-full">
+      <h2 className="text-sm font-bold text-white sm:text-base tracking-tight border-b border-white/[0.04] pb-3">
         {title}
       </h2>
 
-      <div className="mt-4 space-y-3 sm:mt-5 sm:space-y-4">
+      <div className="mt-3 space-y-2.5 flex-1 overflow-hidden">
         {items.length > 0 ? (
           items.map((item) => (
             <div
               key={item._id}
-              className="rounded-xl border border-white/5 bg-black/10 p-3 sm:rounded-2xl sm:border-white/10 sm:bg-black/20 sm:p-4"
+              className="rounded-xl border border-white/[0.04] bg-white/[0.01] p-3 flex w-full"
             >
               {renderItem(item)}
             </div>
           ))
         ) : (
-          <p className="text-xs text-slate-400 sm:text-sm">{emptyText}</p>
+          <div className="py-4 text-left">
+            <p className="text-xs text-slate-500 font-medium">{emptyText}</p>
+          </div>
         )}
       </div>
     </div>
