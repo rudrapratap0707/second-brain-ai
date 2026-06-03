@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import {
   Search,
   Bell,
@@ -12,96 +11,68 @@ import {
   Loader2,
   Menu,
 } from "lucide-react"
-
 import { Link, useNavigate } from "react-router-dom"
-
 import { globalSearch } from "../services/authService"
 
 function Navbar({ setSidebarOpen }) {
   const navigate = useNavigate()
-
   const searchBoxRef = useRef(null)
-
   const user = JSON.parse(localStorage.getItem("user"))
 
+  // --- State Management ---
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState({
-    notes: [],
-    chats: [],
-  })
-
+  const [results, setResults] = useState({ notes: [], chats: [] })
   const [loading, setLoading] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false) // Dynamic Mobile Toggle State
 
-  const [showResults, setShowResults] =
-    useState(false)
-
+  // --- Auth & Actions Handler ---
   const handleLogout = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("user")
     localStorage.removeItem("activeChatId")
-
     navigate("/")
   }
 
   const clearSearch = () => {
     setQuery("")
-
-    setResults({
-      notes: [],
-      chats: [],
-    })
-
+    setResults({ notes: [], chats: [] })
     setShowResults(false)
   }
 
   const handleOpenNote = (noteId) => {
-    localStorage.setItem(
-      "activeNoteId",
-      noteId
-    )
-
+    localStorage.setItem("activeNoteId", noteId)
     clearSearch()
-
+    setIsMobileSearchOpen(false)
     navigate("/notes")
   }
 
   const handleOpenChat = (chatId) => {
-    localStorage.setItem(
-      "activeChatId",
-      chatId
-    )
-
+    localStorage.setItem("activeChatId", chatId)
     clearSearch()
-
+    setIsMobileSearchOpen(false)
     navigate("/assistant")
   }
 
+  // --- Debounced API Search Logic ---
   useEffect(() => {
     const delaySearch = setTimeout(async () => {
       if (!query.trim()) {
-        setResults({
-          notes: [],
-          chats: [],
-        })
-
+        setResults({ notes: [], chats: [] })
         setShowResults(false)
-
         return
       }
 
       try {
         setLoading(true)
-
         setShowResults(true)
-
         const data = await globalSearch(query)
-
         setResults({
           notes: data.notes || [],
           chats: data.chats || [],
         })
       } catch (error) {
-        console.log(error)
+        console.error("Global search error:", error)
       } finally {
         setLoading(false)
       }
@@ -110,273 +81,209 @@ function Navbar({ setSidebarOpen }) {
     return () => clearTimeout(delaySearch)
   }, [query])
 
+  // --- Dropdown Click Outside Listener ---
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        searchBoxRef.current &&
-        !searchBoxRef.current.contains(
-          e.target
-        )
-      ) {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
         setShowResults(false)
       }
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    )
-
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      )
+      document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [])
 
-  const totalResults =
-    results.notes.length +
-    results.chats.length
+  const totalResults = results.notes.length + results.chats.length
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-[#081028]/95 backdrop-blur-xl">
-      <div className="flex flex-col gap-4 px-4 py-4 md:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() =>
-              setSidebarOpen(true)
-            }
-            className="rounded-2xl bg-white/10 p-3 text-white lg:hidden"
-          >
-            <Menu size={20} />
-          </button>
+    <header className="sticky top-0 z-30 w-full border-b border-white/5 bg-[#081028]/90 backdrop-blur-md transition-all duration-300">
+      <div className="mx-auto w-full max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+        
+        {/* BASE HEADER ROW CONTAINER */}
+        <div className="flex items-center justify-between gap-4 relative">
+          
+          {/* LEFT SECTION: Hamburger Toggle + Zero-Wrap Logo */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="inline-flex items-center justify-center rounded-xl bg-white/[0.04] p-2 text-slate-300 hover:bg-white/[0.08] hover:text-white active:scale-95 transition-all lg:hidden shrink-0"
+              aria-label="Open Sidebar Menu"
+            >
+              <Menu size={18} />
+            </button>
+            
+            <span className="text-sm sm:text-base font-bold bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent tracking-tight whitespace-nowrap select-none">
+              SecondBrain
+            </span>
+          </div>
 
-          <div
-            ref={searchBoxRef}
-            className="relative w-full lg:w-[420px]"
-          >
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
-              <Search
-                size={18}
-                className="text-slate-400"
-              />
-
+          {/* LAPTOP/DESKTOP SEARCH INLINE SYSTEM (Hidden completely on mobile/tablets) */}
+          <div ref={searchBoxRef} className="hidden lg:block relative w-full max-w-xs xl:max-w-md mx-4">
+            <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-2 focus-within:border-cyan-500/40 focus-within:bg-white/[0.05] transition-all">
+              <Search size={16} className="text-slate-400 shrink-0" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value)
-
                   setShowResults(true)
                 }}
-                onFocus={() => {
-                  if (query.trim()) {
-                    setShowResults(true)
-                  }
-                }}
                 placeholder="Search notes, chats..."
-                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+                className="w-full bg-transparent text-sm text-white placeholder-slate-500 outline-none"
               />
+              {loading && <Loader2 size={16} className="animate-spin text-cyan-400 shrink-0" />}
+            </div>
 
-              {loading && (
-                <Loader2
-                  size={18}
-                  className="animate-spin text-cyan-400"
-                />
-              )}
+            {/* Desktop UI Results Panel Dropdown */}
+            {showResults && query.trim() && (
+              <div className="absolute left-0 right-0 top-[115%] z-50 max-h-[60vh] overflow-y-auto rounded-xl border border-white/[0.08] bg-[#0B1024]/98 p-4 shadow-2xl backdrop-blur-xl">
+                <div className="mb-2.5 flex items-center justify-between border-b border-white/[0.04] pb-1.5">
+                  <h3 className="text-xs font-semibold text-slate-200">Results</h3>
+                  <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-slate-400">{totalResults} found</span>
+                </div>
+                {/* Search Results Mapping (Reusable identical engine below layout) */}
+                <SearchResultsList loading={loading} totalResults={totalResults} results={results} handleOpenNote={handleOpenNote} handleOpenChat={handleOpenChat} />
+              </div>
+            )}
+          </div>
 
+          {/* ULTRA FLEXIBLE UTILITY RIGHT ACTIONS ROW (Adapts intelligently via hidden breakpoints) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            
+            {/* 🔍 Mobile Search Icon Trigger Button (Hidden completely on Desktop) */}
+            <button
+              onClick={() => setIsMobileSearchOpen(true)}
+              className="inline-flex lg:hidden items-center justify-center rounded-xl bg-white/[0.03] p-2 text-slate-300 border border-white/[0.04] hover:bg-white/[0.08] hover:text-white transition"
+            >
+              <Search size={15} />
+            </button>
+
+            {/* 🏠 Laptop Only Home Button Group Layout */}
+            <Link
+              to="/"
+              className="hidden md:flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-300 border border-white/[0.04] hover:bg-white/[0.08] transition"
+            >
+              <Home size={14} />
+              <span>Home</span>
+            </Link>
+
+            {/* 🔔 Notification Alert Bell (Persistent on all screens) */}
+            <button className="relative flex items-center justify-center rounded-xl bg-white/[0.03] p-2 text-slate-300 border border-white/[0.04] hover:bg-white/[0.08] transition">
+              <Bell size={15} />
+              <span className="absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-cyan-400"></span>
+            </button>
+
+            {/* 👤 Workspace Profile Anchor Node */}
+            <Link
+              to="/profile"
+              className="flex items-center gap-1.5 rounded-xl bg-white/[0.03] p-1.5 sm:pr-3 border border-white/[0.04] hover:bg-white/[0.06] transition"
+            >
+              <UserCircle2 className="text-cyan-400 size-[19px] sm:size-5 shrink-0" />
+              {/* Profile string vanishes cleanly on mobile without compressing structural spaces */}
+              <span className="hidden md:inline text-xs font-medium text-slate-200 max-w-[80px] truncate">
+                {user?.name || "User"}
+              </span>
+            </Link>
+
+            {/* 🚪 Safe Exit Core Session Logout Control (Text hidden on mobile, turns iconic button) */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-red-500/10 border border-red-500/20 p-2 md:px-3 md:py-2 text-red-400 hover:bg-red-500 hover:text-white transition active:scale-95"
+              title="Logout"
+            >
+              <LogOut size={14} />
+              <span className="hidden md:inline text-xs font-medium">Logout</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      {/* FULL RESPONSIVE EXPANDABLE MOBILE OVERLAY COMPONENT BAR */}
+      {isMobileSearchOpen && (
+        <div className="absolute inset-x-0 top-0 z-50 w-full bg-[#081028] px-4 py-3 border-b border-white/10 flex flex-col gap-3 animate-in slide-in-from-top-3 duration-200">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-1 items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-1.5">
+              <Search size={14} className="text-slate-400 shrink-0" />
+              <input
+                type="text"
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search records database..."
+                className="w-full bg-transparent text-xs text-white placeholder-slate-500 outline-none"
+              />
+              {loading && <Loader2 size={14} className="animate-spin text-cyan-400" />}
               {query && !loading && (
-                <button onClick={clearSearch}>
-                  <X
-                    size={18}
-                    className="text-slate-400 hover:text-white"
-                  />
+                <button onClick={clearSearch} className="text-slate-400 hover:text-white">
+                  <X size={12} />
                 </button>
               )}
             </div>
+            
+            <button 
+              onClick={() => { setIsMobileSearchOpen(false); clearSearch(); }}
+              className="text-xs text-slate-400 hover:text-white font-medium whitespace-nowrap px-1"
+            >
+              Cancel
+            </button>
+          </div>
 
-            {showResults &&
-              query.trim() && (
-                <div className="absolute left-0 top-16 z-50 max-h-[70vh] w-full overflow-y-auto rounded-3xl border border-white/10 bg-[#0B1024] p-4 shadow-2xl">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="font-semibold text-white">
-                      Search Results
-                    </h3>
+          {/* Dynamic Render Pipeline Inside Search Layer Context */}
+          {query.trim() && (
+            <div className="max-h-[50vh] overflow-y-auto rounded-xl bg-[#0B1024]/50 border border-white/[0.04] p-2">
+              <SearchResultsList loading={loading} totalResults={totalResults} results={results} handleOpenNote={handleOpenNote} handleOpenChat={handleOpenChat} />
+            </div>
+          )}
+        </div>
+      )}
+    </header>
+  )
+}
 
-                    <span className="text-xs text-slate-400">
-                      {totalResults} found
-                    </span>
-                  </div>
+/* SUB-HELPER RENDER LOGIC: Reusable Clean Component to keep things optimized */
+function SearchResultsList({ loading, totalResults, results, handleOpenNote, handleOpenChat }) {
+  if (loading) return <div className="py-4 text-center text-xs text-slate-400">Searching context files...</div>
+  if (totalResults === 0) return <div className="py-4 text-center text-xs text-slate-400">No matching indexes found.</div>
 
-                  {loading && (
-                    <p className="text-sm text-slate-400">
-                      Searching...
-                    </p>
-                  )}
-
-                  {!loading &&
-                    totalResults === 0 && (
-                      <p className="text-sm text-slate-400">
-                        No matching results.
-                      </p>
-                    )}
-
-                  {!loading &&
-                    results.notes.length >
-                      0 && (
-                      <div className="mb-4">
-                        <p className="mb-2 text-xs uppercase text-cyan-400">
-                          Notes
-                        </p>
-
-                        <div className="space-y-2">
-                          {results.notes.map(
-                            (note) => (
-                              <button
-                                key={note._id}
-                                onClick={() =>
-                                  handleOpenNote(
-                                    note._id
-                                  )
-                                }
-                                className="w-full rounded-2xl bg-white/10 p-3 text-left transition hover:bg-white/20"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <FileText
-                                    size={18}
-                                    className="mt-1 text-cyan-400"
-                                  />
-
-                                  <div>
-                                    <h4 className="line-clamp-1 font-medium text-white">
-                                      {
-                                        note.title
-                                      }
-                                    </h4>
-
-                                    <p className="line-clamp-2 text-sm text-slate-400">
-                                      {
-                                        note.content
-                                      }
-                                    </p>
-                                  </div>
-                                </div>
-                              </button>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                  {!loading &&
-                    results.chats.length >
-                      0 && (
-                      <div>
-                        <p className="mb-2 text-xs uppercase text-purple-400">
-                          AI Chats
-                        </p>
-
-                        <div className="space-y-2">
-                          {results.chats.map(
-                            (chat) => (
-                              <button
-                                key={chat._id}
-                                onClick={() =>
-                                  handleOpenChat(
-                                    chat._id
-                                  )
-                                }
-                                className="w-full rounded-2xl bg-white/10 p-3 text-left transition hover:bg-white/20"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <MessageCircle
-                                    size={18}
-                                    className="mt-1 text-purple-400"
-                                  />
-
-                                  <div>
-                                    <h4 className="line-clamp-1 font-medium text-white">
-                                      {chat.title ||
-                                        "New Chat"}
-                                    </h4>
-
-                                    <p className="line-clamp-2 text-sm text-slate-400">
-                                      {chat
-                                        .messages?.[
-                                        chat
-                                          .messages
-                                          .length -
-                                          1
-                                      ]?.text ||
-                                        "Open chat"}
-                                    </p>
-                                  </div>
-                                </div>
-                              </button>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
+  return (
+    <>
+      {results.notes.length > 0 && (
+        <div className="mb-3">
+          <p className="mb-1 px-1 text-[9px] font-bold uppercase tracking-wider text-cyan-400">Notes</p>
+          <div className="space-y-0.5">
+            {results.notes.map((note) => (
+              <button key={note._id} onClick={() => handleOpenNote(note._id)} className="flex w-full items-start gap-2 rounded-lg p-2 text-left hover:bg-white/[0.04] transition">
+                <FileText size={12} className="mt-0.5 text-cyan-400 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <h4 className="truncate text-xs font-medium text-slate-200">{note.title}</h4>
+                  <p className="line-clamp-1 text-[10px] text-slate-500 mt-0.5">{note.content}</p>
                 </div>
-              )}
+              </button>
+            ))}
           </div>
         </div>
+      )}
 
-        <div className="flex flex-wrap items-center gap-3 lg:justify-end">
-          <Link
-            to="/"
-            className="flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/20"
-          >
-            <Home size={18} />
-            <span className="hidden sm:block">
-              Home
-            </span>
-          </Link>
-
-          <button className="relative rounded-2xl bg-white/10 p-3 transition hover:bg-white/20">
-            <Bell
-              className="text-white"
-              size={20}
-            />
-
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-cyan-400"></span>
-          </button>
-
-          <Link
-            to="/profile"
-            className="flex items-center gap-3 rounded-2xl bg-white/10 px-3 py-2 transition hover:bg-white/20"
-          >
-            <UserCircle2
-              className="text-cyan-400"
-              size={34}
-            />
-
-            <div className="hidden sm:block">
-              <h4 className="font-medium text-white">
-                {user?.name || "User"}
-              </h4>
-
-              <p className="text-sm text-slate-400">
-                Personal Workspace
-              </p>
-            </div>
-          </Link>
-
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 rounded-2xl bg-red-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-400"
-          >
-            <LogOut size={18} />
-
-            <span className="hidden sm:block">
-              Logout
-            </span>
-          </button>
+      {results.chats.length > 0 && (
+        <div>
+          <p className="mb-1 px-1 text-[9px] font-bold uppercase tracking-wider text-purple-400">AI Chats</p>
+          <div className="space-y-0.5">
+            {results.chats.map((chat) => (
+              <button key={chat._id} onClick={() => handleOpenChat(chat._id)} className="flex w-full items-start gap-2 rounded-lg p-2 text-left hover:bg-white/[0.04] transition">
+                <MessageCircle size={12} className="mt-0.5 text-purple-400 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <h4 className="truncate text-xs font-medium text-slate-200">{chat.title || "Untitled Conversation"}</h4>
+                  <p className="line-clamp-1 text-[10px] text-slate-500 mt-0.5">{chat.messages?.[chat.messages.length - 1]?.text || "Empty stream log."}</p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-    </header>
+      )}
+    </>
   )
 }
 
