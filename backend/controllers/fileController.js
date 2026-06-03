@@ -10,6 +10,28 @@ const uploadFile = async (req, res) => {
       })
     }
 
+    console.log("UPLOADED FILE:", req.file)
+
+    const cloudinaryUrl =
+      req.file.secure_url ||
+      req.file.path ||
+      req.file.url
+
+    const publicId =
+      req.file.public_id ||
+      req.file.filename
+
+    if (
+      !cloudinaryUrl ||
+      !cloudinaryUrl.startsWith("http")
+    ) {
+      return res.status(500).json({
+        message:
+          "Cloudinary upload failed. Valid URL not received.",
+        file: req.file,
+      })
+    }
+
     const newFile = await File.create({
       user: req.user._id || req.user.id,
 
@@ -17,26 +39,30 @@ const uploadFile = async (req, res) => {
         req.file.originalname,
 
       fileName:
-        req.file.filename ||
         req.file.originalname,
 
-      filePath: req.file.path,
+      filePath:
+        cloudinaryUrl,
 
-      fileUrl: req.file.path,
+      fileUrl:
+        cloudinaryUrl,
 
       cloudinaryPublicId:
-        req.file.filename,
+        publicId,
 
-      mimeType: req.file.mimetype,
+      mimeType:
+        req.file.mimetype,
 
-      size: req.file.size,
+      size:
+        req.file.size,
 
       extractedText:
-        "File uploaded successfully. AI extraction for Cloudinary files will be improved later.",
+        "File uploaded successfully. AI extraction for Cloudinary files will be added later.",
     })
 
     res.status(201).json({
-      message: "File uploaded successfully",
+      message:
+        "File uploaded successfully",
       file: newFile,
     })
   } catch (error) {
@@ -46,34 +72,45 @@ const uploadFile = async (req, res) => {
     )
 
     res.status(500).json({
-      message: "File upload failed",
-      error: error.message,
+      message:
+        "File upload failed",
+      error:
+        error.message,
     })
   }
 }
 
 // GET USER FILES
-const getFiles = async (req, res) => {
+const getFiles = async (
+  req,
+  res
+) => {
   try {
-    const files = await File.find({
-      user:
-        req.user._id || req.user.id,
-    }).sort({
-      createdAt: -1,
-    })
+    const files =
+      await File.find({
+        user:
+          req.user._id ||
+          req.user.id,
+      }).sort({
+        createdAt: -1,
+      })
 
     res.status(200).json({
       files,
     })
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message:
+        error.message,
     })
   }
 }
 
 // DELETE FILE
-const deleteFile = async (req, res) => {
+const deleteFile = async (
+  req,
+  res
+) => {
   try {
     const file =
       await File.findById(
@@ -82,7 +119,8 @@ const deleteFile = async (req, res) => {
 
     if (!file) {
       return res.status(404).json({
-        message: "File not found",
+        message:
+          "File not found",
       })
     }
 
@@ -94,11 +132,11 @@ const deleteFile = async (req, res) => {
       ).toString()
     ) {
       return res.status(401).json({
-        message: "Unauthorized",
+        message:
+          "Unauthorized",
       })
     }
 
-    // DELETE FROM CLOUDINARY
     if (
       file.cloudinaryPublicId
     ) {
@@ -106,7 +144,8 @@ const deleteFile = async (req, res) => {
         await cloudinary.uploader.destroy(
           file.cloudinaryPublicId,
           {
-            resource_type: "auto",
+            resource_type:
+              "auto",
           }
         )
       } catch (
@@ -127,7 +166,8 @@ const deleteFile = async (req, res) => {
     })
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message:
+        error.message,
     })
   }
 }
