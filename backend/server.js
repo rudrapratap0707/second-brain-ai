@@ -23,19 +23,37 @@ connectDB()
 
 const app = express()
 
-// MIDDLEWARE
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://second-brain-ai-beryl.vercel.app",
+  process.env.CLIENT_URL,
+].filter(Boolean)
+
 app.use(
   cors({
-    origin: true,
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+
+      return callback(new Error("Not allowed by CORS"))
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 )
 
-
+app.options(/.*/, cors())
 
 app.use(express.json())
 
-// ROUTES
+app.get("/", (req, res) => {
+  res.send(
+    "Second Brain AI Backend is running with MongoDB, Gemini AI, Chat History and Student Life OS"
+  )
+})
+
 app.use("/api/auth", authRoutes)
 app.use("/api/notes", noteRoutes)
 app.use("/api/ai", aiRoutes)
@@ -48,20 +66,11 @@ app.use("/api/settings", settingsRoutes)
 app.use("/api/student-life", studentLifeRoutes)
 app.use("/api/search", searchRoutes)
 
-// STATIC UPLOADS
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"))
 )
 
-// TEST ROUTE
-app.get("/", (req, res) => {
-  res.send(
-    "Second Brain AI Backend is running with MongoDB, Gemini AI, Chat History and Student Life OS"
-  )
-})
-
-// 404 HANDLER
 app.use((req, res) => {
   res.status(404).json({
     message: "API route not found",
