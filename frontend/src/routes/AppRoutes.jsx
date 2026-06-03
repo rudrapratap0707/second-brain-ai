@@ -3,6 +3,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Landing from "../pages/Landing"
 import Login from "../pages/Login"
 import Signup from "../pages/Signup"
+
+import ForgotPassword from "../pages/ForgotPassword"
+import ResetPassword from "../pages/ResetPassword"
+
 import Dashboard from "../pages/Dashboard"
 import Notes from "../pages/Notes"
 import Reminders from "../pages/Reminders"
@@ -45,6 +49,16 @@ function AppRoutes() {
 
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPassword />}
+        />
 
         <Route
           path="/dashboard"
@@ -234,6 +248,8 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        
 
         <Route
           path="/student-life/study-improver"

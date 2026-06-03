@@ -10,6 +10,31 @@ export const loginUser = async (userData) => {
   return response.data
 }
 
+export const forgotPassword = async (email) => {
+  const response = await API.post(
+    "/auth/forgot-password",
+    {
+      email,
+    }
+  )
+
+  return response.data
+}
+
+export const resetPassword = async (
+  token,
+  password
+) => {
+  const response = await API.put(
+    `/auth/reset-password/${token}`,
+    {
+      password,
+    }
+  )
+
+  return response.data
+}
+
 export const getProfile = async () => {
   const response = await API.get("/auth/profile")
   return response.data
