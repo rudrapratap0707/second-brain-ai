@@ -6,52 +6,26 @@ const {
 
 const cloudinary = require("../config/cloudinary")
 
-const storage =
-  new CloudinaryStorage({
-    cloudinary,
+const storage = new CloudinaryStorage({
+  cloudinary,
 
-    params: async (req, file) => ({
-      folder: "second-brain-files",
-
-      resource_type: "auto",
-
-      public_id:
-        Date.now() +
-        "-" +
-        file.originalname
-          .split(".")[0],
-    }),
-  })
-
-const upload = multer({
-  storage,
-})
-
-module.exports = upload
-const fs = require("fs")
-
-const uploadDir = path.join(__dirname, "../uploads/documents")
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true })
-}
-
-
-
-  filename(req, file, cb) {
-    const uniqueName =
+  params: async (req, file) => ({
+    folder: "second-brain-files",
+    resource_type: "auto",
+    public_id:
       Date.now() +
       "-" +
-      Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname)
-
-    cb(null, uniqueName)
-  },
+      file.originalname
+        .split(".")[0]
+        .replace(/\s+/g, "-")
+        .replace(/[^a-zA-Z0-9-_]/g, ""),
+  }),
 })
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "application/pdf",
+    "text/plain",
     "image/jpeg",
     "image/png",
     "image/webp",
@@ -62,11 +36,15 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true)
   } else {
-    cb(new Error("Only PDF, image, DOC, and DOCX files are allowed"))
+    cb(
+      new Error(
+        "Only PDF, TXT, image, DOC, and DOCX files are allowed"
+      )
+    )
   }
 }
 
-const uploadDocument = multer({
+const upload = multer({
   storage,
   fileFilter,
   limits: {
@@ -74,4 +52,4 @@ const uploadDocument = multer({
   },
 })
 
-module.exports = uploadDocument
+module.exports = upload
