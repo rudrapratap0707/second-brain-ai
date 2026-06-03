@@ -343,10 +343,10 @@ function StudentLife() {
         <div className="flex min-h-[75vh] items-center justify-center px-4 sm:px-6">
           <div className="w-full max-w-sm rounded-2xl border border-white/5 bg-white/5 p-6 text-center backdrop-blur-lg sm:max-w-md sm:p-8">
             <Loader2 className="mx-auto animate-spin text-cyan-400" size={32} />
-            <h2 className="mt-4 text-base font-bold text-white sm:text-lg md:text-xl">
+            <h2 className="mt-4 text-lg font-bold text-white sm:text-xl">
               Loading Student Life OS
             </h2>
-            <p className="mt-1.5 text-xs text-slate-400 sm:text-sm">
+            <p className="mt-2 text-sm text-slate-400">
               Fetching real student data from backend...
             </p>
           </div>
@@ -358,14 +358,14 @@ function StudentLife() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="mx-auto max-w-4xl rounded-2xl border border-red-500/20 bg-red-500/10 p-4 sm:p-6 md:p-8">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-red-500/20 bg-red-500/10 p-5 sm:p-6 md:p-8">
           <div className="flex flex-col gap-3 text-red-300 sm:flex-row sm:items-start sm:gap-4">
             <AlertTriangle size={24} className="shrink-0 mt-0.5 text-red-400" />
             <div className="min-w-0 flex-1">
-              <h2 className="text-base font-bold sm:text-lg md:text-xl">
+              <h2 className="text-lg font-bold sm:text-xl">
                 Student Life OS failed to load
               </h2>
-              <p className="mt-1 text-xs text-red-200/80 sm:text-sm leading-relaxed">
+              <p className="mt-1.5 text-sm text-red-200/80 leading-relaxed">
                 {error}
               </p>
             </div>
@@ -373,7 +373,7 @@ function StudentLife() {
           <button
             type="button"
             onClick={fetchDashboard}
-            className="mt-4 rounded-xl bg-red-500 px-4 py-2 text-xs font-bold text-black transition hover:bg-red-400 active:scale-95 sm:text-sm"
+            className="mt-4 rounded-xl bg-red-500 px-5 py-2.5 text-sm font-bold text-black transition hover:bg-red-400 active:scale-95"
           >
             Retry
           </button>
@@ -384,40 +384,40 @@ function StudentLife() {
 
   return (
     <DashboardLayout>
-      <div className="w-full mx-auto max-w-[1600px] space-y-4 px-1 py-2 sm:space-y-6 sm:px-4 md:space-y-8 md:py-4">
+      <div className="w-full mx-auto max-w-[1600px] space-y-5 px-2 py-3 sm:space-y-6 sm:px-4 md:space-y-8 md:py-4">
         
         {/* Banner Section */}
         <HeroSection profile={profile} />
 
         {/* Analytics Statistics Grid */}
-        <section className="grid grid-cols-1 gap-3.5 xs:grid-cols-2 lg:grid-cols-4 sm:gap-4 md:gap-5">
+        <section className="grid grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-4 md:gap-5">
           {statCards.map((card) => (
             <StatCard key={card.title} card={card} />
           ))}
         </section>
 
         {/* Data Integration & Principles Grid */}
-        <section className="grid grid-cols-1 gap-3.5 xs:grid-cols-2 lg:grid-cols-4 sm:gap-4 md:gap-5">
+        <section className="grid grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-4 md:gap-5">
           {dataRules.map((rule) => (
             <RuleCard key={rule.title} rule={rule} />
           ))}
         </section>
 
         {/* Main Operational Core Modules Grid */}
-        <section className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-6 md:p-8">
-          <div className="mb-5 flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between border-b border-white/[0.04] pb-5">
+        <section className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md sm:p-6 md:p-8">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-white/[0.04] pb-5">
             <div className="min-w-0">
-              <h2 className="text-base font-bold text-white sm:text-xl md:text-2xl tracking-tight">
+              <h2 className="text-lg font-bold text-white sm:text-xl md:text-2xl tracking-tight">
                 Student Life Modules
               </h2>
-              <p className="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm">
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
                 Each module is connected with backend APIs and real MongoDB data.
               </p>
             </div>
 
-            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-xl bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:px-4 sm:py-2">
-              <PlugZap size={14} className="shrink-0 text-cyan-400 animate-pulse" />
-              <span className="truncate text-[11px] sm:text-xs font-medium">MongoDB dashboard API connected</span>
+            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-sm text-slate-300">
+              <PlugZap size={16} className="shrink-0 text-cyan-400 animate-pulse" />
+              <span className="truncate font-medium">MongoDB dashboard API connected</span>
             </div>
           </div>
 
@@ -436,8 +436,8 @@ function StudentLife() {
             items={upcoming?.exams || []}
             renderItem={(exam) => (
               <div className="min-w-0 w-full">
-                <h3 className="truncate text-xs font-bold text-white sm:text-sm">{exam.subject}</h3>
-                <p className="mt-1 text-[11px] text-slate-400 sm:text-xs font-medium">
+                <h3 className="truncate text-sm font-bold text-white">{exam.subject}</h3>
+                <p className="mt-1 text-xs text-slate-400 font-medium">
                   {formatDate(exam.examDate)}
                 </p>
               </div>
@@ -450,12 +450,12 @@ function StudentLife() {
             items={upcoming?.targets || []}
             renderItem={(target) => (
               <div className="min-w-0 w-full">
-                <h3 className="truncate text-xs font-bold text-white sm:text-sm">{target.title}</h3>
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="h-1.5 flex-1 rounded-full bg-white/5 overflow-hidden">
+                <h3 className="truncate text-sm font-bold text-white">{target.title}</h3>
+                <div className="mt-2.5 flex items-center gap-3">
+                  <div className="h-2 flex-1 rounded-full bg-white/5 overflow-hidden">
                     <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${Math.min(target.progress || 0, 100)}%` }} />
                   </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-cyan-400 shrink-0">
+                  <span className="text-xs font-semibold text-cyan-400 shrink-0">
                     {target.progress || 0}%
                   </span>
                 </div>
@@ -469,8 +469,8 @@ function StudentLife() {
             items={upcoming?.checkpoints || []}
             renderItem={(checkpoint) => (
               <div className="min-w-0 w-full flex items-center justify-between gap-3">
-                <h3 className="truncate text-xs font-bold text-white sm:text-sm">{checkpoint.title}</h3>
-                <span className="shrink-0 px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20 text-[10px] font-medium text-amber-300">
+                <h3 className="truncate text-sm font-bold text-white">{checkpoint.title}</h3>
+                <span className="shrink-0 px-2.5 py-1 rounded-md bg-amber-400/10 border border-amber-400/20 text-xs font-medium text-amber-300">
                   {checkpoint.status || "Pending"}
                 </span>
               </div>
@@ -501,25 +501,25 @@ function StudentLife() {
               {aiCapabilities.map((capability) => (
                 <div
                   key={capability}
-                  className="flex gap-3 rounded-xl border border-white/[0.04] bg-white/[0.01] p-3 sm:p-4"
+                  className="flex gap-3 rounded-xl border border-white/[0.04] bg-white/[0.01] p-4"
                 >
                   <div className="mt-0.5 shrink-0 text-cyan-400">
-                    <CheckCircle2 size={14} className="sm:w-4 sm:h-4" />
+                    <CheckCircle2 size={16} />
                   </div>
-                  <p className="text-xs leading-relaxed text-slate-300">
+                  <p className="text-sm leading-relaxed text-slate-300">
                     {capability}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 rounded-xl border border-cyan-500/10 bg-cyan-500/[0.02] p-4 sm:mt-5">
+            <div className="mt-5 rounded-xl border border-cyan-500/10 bg-cyan-500/[0.02] p-4">
               <div className="flex items-center gap-2 text-cyan-300">
-                <Activity size={14} className="shrink-0 text-cyan-400" />
-                <h3 className="text-xs font-bold sm:text-sm">Next Development Phase</h3>
+                <Activity size={16} className="shrink-0 text-cyan-400" />
+                <h3 className="text-sm font-bold">Next Development Phase</h3>
               </div>
 
-              <p className="mt-2 text-xs leading-relaxed text-slate-400">
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">
                 Next upgrades can include real AI timetable generation, OCR document reading,
                 notes summarization, revision reminders, and skill-based study recommendations.
               </p>
@@ -533,27 +533,27 @@ function StudentLife() {
 
 function HeroSection({ profile }) {
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-6 md:p-8">
+    <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md sm:p-6 md:p-8">
       <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-3.5 sm:flex-row sm:items-start sm:gap-4 md:gap-5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-black shadow-lg shadow-cyan-500/10 sm:h-14 sm:w-14 sm:rounded-2xl">
-            <GraduationCap size={22} className="sm:size-6" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-4 md:gap-5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-black shadow-lg shadow-cyan-500/10 sm:h-14 sm:w-14 sm:rounded-2xl">
+            <GraduationCap size={24} />
           </div>
 
           <div className="min-w-0">
-            <div className="mb-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-2.5 py-0.5 text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
-              <ShieldCheck size={12} className="shrink-0" />
+            <div className="mb-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1 text-xs font-bold text-cyan-400 uppercase tracking-wider">
+              <ShieldCheck size={14} className="shrink-0" />
               <span className="truncate">Live Production Environment</span>
             </div>
 
-            <h1 className="text-xl font-black leading-tight text-white sm:text-2xl md:text-3xl lg:text-4xl tracking-tight">
+            <h1 className="text-2xl font-black leading-tight text-white sm:text-3xl lg:text-4xl tracking-tight">
               Student Life OS
             </h1>
 
-            <p className="mt-2 max-w-3xl text-xs leading-relaxed text-slate-400 sm:text-sm">
+            <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-slate-400">
               A complete AI-powered academic life management system for college
               students. This dashboard uses backend data only and avoids fake
               static statistics.
@@ -561,12 +561,12 @@ function HeroSection({ profile }) {
           </div>
         </div>
 
-        <div className="w-full rounded-xl border border-white/5 bg-white/[0.02] p-3 sm:p-4 lg:w-auto lg:min-w-[260px] shrink-0">
+        <div className="w-full rounded-xl border border-white/5 bg-white/[0.02] p-4 lg:w-auto lg:min-w-[260px] shrink-0">
           <div className="flex items-center gap-3 text-slate-300">
-            <Construction size={16} className="shrink-0 text-amber-400" />
+            <Construction size={18} className="shrink-0 text-amber-400" />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Current Profile</p>
-              <p className="truncate text-xs font-semibold text-white sm:text-sm mt-0.5">
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Current Profile</p>
+              <p className="truncate text-sm font-semibold text-white mt-1">
                 {profile?.courseName || "Profile not completed"}
               </p>
             </div>
@@ -581,18 +581,18 @@ function StatCard({ card }) {
   const Icon = card.icon
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md hover:border-white/10 transition-colors">
-      <div className="mb-3.5 flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
-        <Icon size={16} />
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md hover:border-white/10 transition-colors">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+        <Icon size={18} />
       </div>
 
-      <p className="text-xs font-medium text-slate-400">{card.title}</p>
+      <p className="text-sm font-medium text-slate-400">{card.title}</p>
 
-      <h2 className="mt-1 text-xl font-bold text-white sm:text-2xl md:text-3xl tracking-tight">
+      <h2 className="mt-1 text-2xl font-bold text-white sm:text-3xl tracking-tight">
         {card.value}
       </h2>
 
-      <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+      <p className="mt-2 text-xs leading-relaxed text-slate-500">
         {card.description}
       </p>
     </div>
@@ -603,16 +603,16 @@ function RuleCard({ rule }) {
   const Icon = rule.icon
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md">
-      <div className="mb-3.5 flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
-        <Icon size={16} />
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+        <Icon size={18} />
       </div>
 
-      <h2 className="text-xs font-bold text-white sm:text-sm">
+      <h2 className="text-sm font-bold text-white sm:text-base">
         {rule.title}
       </h2>
 
-      <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+      <p className="mt-2 text-sm leading-relaxed text-slate-400">
         {rule.text}
       </p>
     </div>
@@ -623,34 +623,34 @@ function ModuleCard({ module }) {
   const Icon = module.icon
 
   return (
-    <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] p-4 transition-all duration-300 hover:bg-white/[0.03] hover:border-white/10 sm:p-5 md:hover:-translate-y-0.5">
+    <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] p-5 transition-all duration-300 hover:bg-white/[0.03] hover:border-white/10 md:hover:-translate-y-0.5">
       <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-cyan-500/[0.02] blur-2xl pointer-events-none transition group-hover:bg-cyan-500/5" />
 
       <div className="relative z-10 flex flex-col h-full justify-between">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400 sm:h-10 sm:w-10">
-              <Icon size={18} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+              <Icon size={20} />
             </div>
 
-            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 tracking-wide uppercase">
+            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-400 tracking-wide uppercase">
               {module.status}
             </span>
           </div>
 
-          <h3 className="mt-3 text-sm font-bold text-white sm:text-base tracking-tight">
+          <h3 className="mt-4 text-base font-bold text-white tracking-tight">
             {module.title}
           </h3>
 
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400 line-clamp-3 lg:line-clamp-none lg:min-h-[64px]">
+          <p className="mt-2 text-sm leading-relaxed text-slate-400 lg:min-h-[72px]">
             {module.description}
           </p>
 
-          <div className="mt-3 rounded-xl border border-white/5 bg-black/20 p-3">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+          <div className="mt-4 rounded-xl border border-white/5 bg-black/20 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Backend Properties
             </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-slate-300 line-clamp-2">
+            <p className="mt-1 text-xs leading-relaxed text-slate-300">
               {module.futureData}
             </p>
           </div>
@@ -658,10 +658,10 @@ function ModuleCard({ module }) {
 
         <Link
           to={module.route}
-          className="mt-4 flex w-full items-center justify-between rounded-xl bg-cyan-500 px-3.5 py-2.5 text-left text-xs font-bold text-black shadow-md shadow-cyan-500/5 transition hover:bg-cyan-400 active:scale-[0.98]"
+          className="mt-5 flex w-full items-center justify-between rounded-xl bg-cyan-500 px-4 py-3 text-left text-sm font-bold text-black shadow-md shadow-cyan-500/5 transition hover:bg-cyan-400 active:scale-[0.98]"
         >
           <span>Open Module</span>
-          <ArrowRight size={14} className="shrink-0 transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight size={16} className="shrink-0 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
     </article>
@@ -670,9 +670,9 @@ function ModuleCard({ module }) {
 
 function InfoPanel({ icon: Icon, title, subtitle, children }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-6">
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md sm:p-6">
       <SectionHeader icon={Icon} title={title} subtitle={subtitle} />
-      <div className="mt-4">{children}</div>
+      <div className="mt-5">{children}</div>
     </div>
   )
 }
@@ -680,12 +680,12 @@ function InfoPanel({ icon: Icon, title, subtitle, children }) {
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (
     <div className="flex items-center gap-3 border-b border-white/[0.04] pb-4 w-full">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
-        <Icon size={16} />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+        <Icon size={18} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <h2 className="truncate text-sm font-bold text-white sm:text-base tracking-tight">
+        <h2 className="truncate text-base font-bold text-white tracking-tight">
           {title}
         </h2>
         <p className="truncate text-xs text-slate-500 mt-0.5">{subtitle}</p>
@@ -698,14 +698,14 @@ function BackendPlanItem({ item }) {
   const Icon = item.icon
 
   return (
-    <div className="flex gap-3 rounded-xl border border-white/[0.04] bg-white/[0.01] p-3 sm:p-4 w-full">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-cyan-400">
-        <Icon size={14} />
+    <div className="flex gap-3 rounded-xl border border-white/[0.04] bg-white/[0.01] p-4 w-full">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5 text-cyan-400">
+        <Icon size={16} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-xs font-bold text-white sm:text-sm">{item.title}</h3>
-        <p className="mt-1 text-xs leading-relaxed text-slate-400">
+        <h3 className="truncate text-sm font-bold text-white">{item.title}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-slate-400">
           {item.description}
         </p>
       </div>
@@ -715,24 +715,24 @@ function BackendPlanItem({ item }) {
 
 function DataListCard({ title, emptyText, items, renderItem }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md flex flex-col min-w-0 w-full">
-      <h2 className="text-sm font-bold text-white sm:text-base tracking-tight border-b border-white/[0.04] pb-3">
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md flex flex-col min-w-0 w-full">
+      <h2 className="text-base font-bold text-white tracking-tight border-b border-white/[0.04] pb-3">
         {title}
       </h2>
 
-      <div className="mt-3 space-y-2.5 flex-1 overflow-hidden">
+      <div className="mt-4 space-y-3 flex-1 overflow-hidden">
         {items.length > 0 ? (
           items.map((item) => (
             <div
               key={item._id}
-              className="rounded-xl border border-white/[0.04] bg-white/[0.01] p-3 flex w-full"
+              className="rounded-xl border border-white/[0.04] bg-white/[0.01] p-4 flex w-full"
             >
               {renderItem(item)}
             </div>
           ))
         ) : (
           <div className="py-4 text-left">
-            <p className="text-xs text-slate-500 font-medium">{emptyText}</p>
+            <p className="text-sm text-slate-500 font-medium">{emptyText}</p>
           </div>
         )}
       </div>
