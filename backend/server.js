@@ -1,7 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 const dotenv = require("dotenv")
-const path = require("path")
+
 
 const connectDB = require("./config/db")
 
@@ -71,10 +71,7 @@ app.use(
   express.static(path.join(__dirname, "uploads", "documents"))
 )
 
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "uploads"))
-)
+
 
 app.use((req, res) => {
   res.status(404).json({

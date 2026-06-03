@@ -1,5 +1,33 @@
 const multer = require("multer")
-const path = require("path")
+
+const {
+  CloudinaryStorage,
+} = require("multer-storage-cloudinary")
+
+const cloudinary = require("../config/cloudinary")
+
+const storage =
+  new CloudinaryStorage({
+    cloudinary,
+
+    params: async (req, file) => ({
+      folder: "second-brain-files",
+
+      resource_type: "auto",
+
+      public_id:
+        Date.now() +
+        "-" +
+        file.originalname
+          .split(".")[0],
+    }),
+  })
+
+const upload = multer({
+  storage,
+})
+
+module.exports = upload
 const fs = require("fs")
 
 const uploadDir = path.join(__dirname, "../uploads/documents")
@@ -8,10 +36,7 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true })
 }
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, uploadDir)
-  },
+
 
   filename(req, file, cb) {
     const uniqueName =

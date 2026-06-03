@@ -243,6 +243,29 @@ function FileCard({ file, onDelete }) {
         </div>
       </div>
 
+      {/* FILE PREVIEW */}
+      {file.fileUrl && (
+        <a
+          href={file.fileUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 flex items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
+        >
+          Open File
+        </a>
+      )}
+
+      {/* IMAGE PREVIEW */}
+      {file.mimeType?.startsWith(
+        "image/"
+      ) && (
+        <img
+          src={file.fileUrl}
+          alt={file.originalName}
+          className="mt-4 h-48 w-full rounded-2xl object-cover"
+        />
+      )}
+
       <div className="mt-5 rounded-2xl border border-white/5 bg-black/20 p-4">
         <p className="mb-3 text-sm font-semibold text-cyan-300">
           AI Extracted Text
@@ -250,14 +273,18 @@ function FileCard({ file, onDelete }) {
 
         <p className="line-clamp-6 whitespace-pre-line text-sm leading-6 text-slate-400">
           {file.extractedText
-            ? file.extractedText.slice(0, 500).trim()
+            ? file.extractedText
+                .slice(0, 500)
+                .trim()
             : "No text extracted."}
         </p>
       </div>
 
       <div className="mt-5">
         <button
-          onClick={() => onDelete(file._id)}
+          onClick={() =>
+            onDelete(file._id)
+          }
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-400"
         >
           <Trash2 size={17} />
