@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-
 import DashboardLayout from "../layouts/DashboardLayout"
-
 import {
   BarChart3,
   Plus,
@@ -19,7 +17,6 @@ import {
   TrendingUp,
   Trophy,
 } from "lucide-react"
-
 import {
   createSkill,
   getSkills,
@@ -43,53 +40,43 @@ const skillCategories = [
 const categoryConfig = {
   Programming: {
     icon: Code2,
-    className:
-      "from-cyan-500/20 to-blue-500/10 border-cyan-400/20 text-cyan-200",
+    className: "from-cyan-500/20 to-blue-500/10 border-cyan-400/20 text-cyan-200",
   },
   "Web Development": {
     icon: Code2,
-    className:
-      "from-violet-500/20 to-purple-500/10 border-violet-400/20 text-violet-200",
+    className: "from-violet-500/20 to-purple-500/10 border-violet-400/20 text-violet-200",
   },
   Aptitude: {
     icon: Brain,
-    className:
-      "from-yellow-500/20 to-orange-500/10 border-yellow-400/20 text-yellow-200",
+    className: "from-yellow-500/20 to-orange-500/10 border-yellow-400/20 text-yellow-200",
   },
   Communication: {
     icon: MessageCircle,
-    className:
-      "from-pink-500/20 to-rose-500/10 border-pink-400/20 text-pink-200",
+    className: "from-pink-500/20 to-rose-500/10 border-pink-400/20 text-pink-200",
   },
   Design: {
     icon: Palette,
-    className:
-      "from-fuchsia-500/20 to-pink-500/10 border-fuchsia-400/20 text-fuchsia-200",
+    className: "from-fuchsia-500/20 to-pink-500/10 border-fuchsia-400/20 text-fuchsia-200",
   },
   Database: {
     icon: Database,
-    className:
-      "from-green-500/20 to-emerald-500/10 border-green-400/20 text-green-200",
+    className: "from-green-500/20 to-emerald-500/10 border-green-400/20 text-green-200",
   },
   AI: {
     icon: Zap,
-    className:
-      "from-indigo-500/20 to-blue-500/10 border-indigo-400/20 text-indigo-200",
+    className: "from-indigo-500/20 to-blue-500/10 border-indigo-400/20 text-indigo-200",
   },
   Cloud: {
     icon: Cloud,
-    className:
-      "from-sky-500/20 to-cyan-500/10 border-sky-400/20 text-sky-200",
+    className: "from-sky-500/20 to-cyan-500/10 border-sky-400/20 text-sky-200",
   },
   "College Subject": {
     icon: BookOpen,
-    className:
-      "from-lime-500/20 to-green-500/10 border-lime-400/20 text-lime-200",
+    className: "from-lime-500/20 to-green-500/10 border-lime-400/20 text-lime-200",
   },
   Other: {
     icon: Target,
-    className:
-      "from-slate-500/20 to-slate-500/10 border-slate-400/20 text-slate-200",
+    className: "from-slate-500/20 to-slate-500/10 border-slate-400/20 text-slate-200",
   },
 }
 
@@ -113,16 +100,11 @@ function SkillsMonitor() {
   const fetchSkills = async () => {
     try {
       setLoading(true)
-
       const data = await getSkills()
-
       setSkills(data.skills || [])
     } catch (error) {
       console.log(error)
-      alert(
-        error.response?.data?.message ||
-          "Failed to fetch skills"
-      )
+      alert(error.response?.data?.message || "Failed to fetch skills")
     } finally {
       setLoading(false)
     }
@@ -138,28 +120,19 @@ function SkillsMonitor() {
     const avgCurrent =
       total > 0
         ? Math.round(
-            skills.reduce(
-              (sum, skill) =>
-                sum + Number(skill.currentLevel || 0),
-              0
-            ) / total
+            skills.reduce((sum, skill) => sum + Number(skill.currentLevel || 0), 0) / total
           )
         : 0
 
     const avgTarget =
       total > 0
         ? Math.round(
-            skills.reduce(
-              (sum, skill) =>
-                sum + Number(skill.targetLevel || 0),
-              0
-            ) / total
+            skills.reduce((sum, skill) => sum + Number(skill.targetLevel || 0), 0) / total
           )
         : 0
 
     const totalHours = skills.reduce(
-      (sum, skill) =>
-        sum + Number(skill.totalPracticeHours || 0),
+      (sum, skill) => sum + Number(skill.totalPracticeHours || 0),
       0
     )
 
@@ -169,10 +142,7 @@ function SkillsMonitor() {
 
     const readiness =
       avgTarget > 0
-        ? Math.min(
-            100,
-            Math.round((avgCurrent / avgTarget) * 100)
-          )
+        ? Math.min(100, Math.round((avgCurrent / avgTarget) * 100))
         : 0
 
     return {
@@ -188,9 +158,7 @@ function SkillsMonitor() {
   const groupedSkills = useMemo(() => {
     return skillCategories.map((category) => ({
       category,
-      skills: skills.filter(
-        (skill) => skill.category === category
-      ),
+      skills: skills.filter((skill) => skill.category === category),
     }))
   }, [skills])
 
@@ -215,9 +183,7 @@ function SkillsMonitor() {
         currentLevel: Number(form.currentLevel || 0),
         targetLevel: Number(form.targetLevel || 100),
         confidenceLevel: Number(form.confidenceLevel || 3),
-        totalPracticeHours: Number(
-          form.totalPracticeHours || 0
-        ),
+        totalPracticeHours: Number(form.totalPracticeHours || 0),
         learningSource: form.learningSource,
         weakTopics: toArray(form.weakTopicsText),
         strongTopics: toArray(form.strongTopicsText),
@@ -239,10 +205,7 @@ function SkillsMonitor() {
       fetchSkills()
     } catch (error) {
       console.log(error)
-      alert(
-        error.response?.data?.message ||
-          "Failed to create skill"
-      )
+      alert(error.response?.data?.message || "Failed to create skill")
     } finally {
       setSaving(false)
     }
@@ -263,7 +226,6 @@ function SkillsMonitor() {
         currentLevel: Number(value),
         lastPracticedAt: new Date(),
       })
-
       fetchSkills()
     } catch (error) {
       console.log(error)
@@ -273,11 +235,9 @@ function SkillsMonitor() {
   const handlePracticeHourAdd = async (skill) => {
     try {
       await updateSkill(skill._id, {
-        totalPracticeHours:
-          Number(skill.totalPracticeHours || 0) + 1,
+        totalPracticeHours: Number(skill.totalPracticeHours || 0) + 1,
         lastPracticedAt: new Date(),
       })
-
       fetchSkills()
     } catch (error) {
       console.log(error)
@@ -286,221 +246,156 @@ function SkillsMonitor() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-white/10 p-8 backdrop-blur-xl">
-          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
+      <div className="space-y-6 sm:space-y-8 px-2 sm:px-0 max-w-full overflow-x-hidden">
+        {/* Top Header Card */}
+        <section className="relative overflow-hidden rounded-2xl sm:rounded-[32px] border border-white/10 bg-white/5 p-4 sm:p-6 lg:p-8 backdrop-blur-xl">
+          <div className="absolute -right-24 -top-24 h-48 w-48 sm:h-72 sm:w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-48 w-48 sm:h-72 sm:w-72 rounded-full bg-violet-500/10 blur-3xl" />
 
-          <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500 text-black">
-                <BarChart3 size={34} />
+          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-cyan-500 text-black">
+                <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8" />
               </div>
 
               <div>
-                <h1 className="text-4xl font-bold text-white">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
                   Skills Monitor
                 </h1>
-
-                <p className="mt-2 max-w-3xl text-slate-400">
-                  Career-readiness dashboard for technical,
-                  aptitude, communication, and academic skill growth.
+                <p className="mt-1 sm:mt-2 text-xs sm:text-sm max-w-2xl text-slate-400 leading-relaxed">
+                  Career-readiness dashboard for technical, aptitude, communication, and academic skill growth.
                 </p>
               </div>
             </div>
 
-            <ReadinessRing value={analytics.readiness} />
+            <div className="w-full lg:w-auto shrink-0">
+              <ReadinessRing value={analytics.readiness} />
+            </div>
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-5">
-          <MetricCard
-            label="Skills"
-            value={analytics.total}
-            icon={BarChart3}
-          />
-
-          <MetricCard
-            label="Avg Level"
-            value={`${analytics.avgCurrent}%`}
-            icon={TrendingUp}
-          />
-
-          <MetricCard
-            label="Target Avg"
-            value={`${analytics.avgTarget}%`}
-            icon={Target}
-          />
-
-          <MetricCard
-            label="Practice Hours"
-            value={analytics.totalHours}
-            icon={Zap}
-          />
-
-          <MetricCard
-            label="Strong Skills"
-            value={analytics.highSkills}
-            icon={Trophy}
-          />
+        {/* Analytics Grid */}
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
+          <MetricCard label="Skills" value={analytics.total} icon={BarChart3} />
+          <MetricCard label="Avg Level" value={`${analytics.avgCurrent}%`} icon={TrendingUp} />
+          <MetricCard label="Target Avg" value={`${analytics.avgTarget}%`} icon={Target} />
+          <MetricCard label="Practice Hours" value={analytics.totalHours} icon={Zap} />
+          <div className="col-span-2 sm:col-span-1 md:col-span-1">
+            <MetricCard label="Strong Skills" value={analytics.highSkills} icon={Trophy} />
+          </div>
         </section>
 
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-          <section className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-            <h2 className="mb-6 text-2xl font-bold text-white">
+        {/* Main Content Layout splits form and data display dynamically */}
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 xl:grid-cols-3 items-start">
+          {/* Add Skill Form Section */}
+          <section className="rounded-2xl sm:rounded-[32px] border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-xl xl:sticky xl:top-6">
+            <h2 className="mb-4 sm:mb-6 text-xl sm:text-2xl font-bold text-white">
               Add New Skill
             </h2>
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
               <Input
                 label="Skill Name"
                 value={form.skillName}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    skillName: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, skillName: v })}
               />
 
               <Select
                 label="Category"
                 value={form.category}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    category: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, category: v })}
                 options={skillCategories}
               />
 
               <RangeInput
                 label="Current Level"
                 value={form.currentLevel}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    currentLevel: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, currentLevel: v })}
               />
 
               <RangeInput
                 label="Target Level"
                 value={form.targetLevel}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    targetLevel: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, targetLevel: v })}
               />
 
-              <Input
-                type="number"
-                label="Confidence Level 1-5"
-                value={form.confidenceLevel}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    confidenceLevel: v,
-                  })
-                }
-              />
-
-              <Input
-                type="number"
-                label="Practice Hours"
-                value={form.totalPracticeHours}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    totalPracticeHours: v,
-                  })
-                }
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  type="number"
+                  label="Confidence (1-5)"
+                  value={form.confidenceLevel}
+                  onChange={(v) => setForm({ ...form, confidenceLevel: v })}
+                />
+                <Input
+                  type="number"
+                  label="Practice Hours"
+                  value={form.totalPracticeHours}
+                  onChange={(v) => setForm({ ...form, totalPracticeHours: v })}
+                />
+              </div>
 
               <Input
                 label="Learning Source"
                 value={form.learningSource}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    learningSource: v,
-                  })
-                }
+                onChange={(v) => setForm({ ...form, learningSource: v })}
               />
 
               <Textarea
                 label="Weak Topics"
                 value={form.weakTopicsText}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    weakTopicsText: v,
-                  })
-                }
-                placeholder="Comma separated: hooks, routing, state"
+                onChange={(v) => setForm({ ...form, weakTopicsText: v })}
+                placeholder="hooks, routing, state"
               />
 
               <Textarea
                 label="Strong Topics"
                 value={form.strongTopicsText}
-                onChange={(v) =>
-                  setForm({
-                    ...form,
-                    strongTopicsText: v,
-                  })
-                }
-                placeholder="Comma separated: components, props"
+                onChange={(v) => setForm({ ...form, strongTopicsText: v })}
+                placeholder="components, props"
               />
 
               <button
                 type="button"
                 onClick={handleCreateSkill}
                 disabled={saving}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-4 font-bold text-black"
+                className="flex w-full items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-cyan-500 px-4 py-3.5 text-sm sm:text-base font-bold text-black transition active:scale-[0.98] disabled:opacity-50"
               >
                 {saving ? (
-                  <Loader2 className="animate-spin" size={20} />
+                  <Loader2 className="animate-spin" size={18} />
                 ) : (
-                  <Plus size={20} />
+                  <Plus size={18} />
                 )}
                 Add Skill
               </button>
             </div>
           </section>
 
-          <section className="xl:col-span-2">
-            <div className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-              <div className="mb-7 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          {/* Growth Board Section */}
+          <section className="xl:col-span-2 w-full">
+            <div className="rounded-2xl sm:rounded-[32px] border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-xl">
+              <div className="mb-5 sm:mb-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
                     Skill Growth Board
                   </h2>
-
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-0.5 text-xs sm:text-sm text-slate-400">
                     RPG-style progress cards grouped by category.
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-white/10 px-4 py-2 text-sm text-slate-300">
+                <div className="self-start sm:self-auto rounded-xl bg-white/10 px-3 py-1.5 text-xs font-medium text-slate-300">
                   {skills.length} Skills Tracked
                 </div>
               </div>
 
               {loading ? (
-                <div className="flex justify-center py-16">
-                  <Loader2
-                    className="animate-spin text-cyan-400"
-                    size={42}
-                  />
+                <div className="flex justify-center py-12 sm:py-16">
+                  <Loader2 className="animate-spin text-cyan-400" size={36} />
                 </div>
               ) : skills.length === 0 ? (
                 <EmptySkills />
               ) : (
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
                   {groupedSkills
                     .filter((group) => group.skills.length > 0)
                     .map((group) => (
@@ -530,30 +425,26 @@ function SkillGroup({
   onLevelUpdate,
   onPracticeHourAdd,
 }) {
-  const config =
-    categoryConfig[category] || categoryConfig.Other
-
+  const config = categoryConfig[category] || categoryConfig.Other
   const Icon = config.icon
 
   return (
-    <div>
-      <div className="mb-4 flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl border bg-gradient-to-br ${config.className}`}
-        >
-          <Icon size={20} />
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className={`flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg sm:rounded-xl border bg-gradient-to-br ${config.className}`}>
+          <Icon size={16} className="sm:scale-110" />
         </div>
 
-        <h3 className="text-xl font-bold text-white">
+        <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
           {category}
         </h3>
 
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-300">
+        <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
           {skills.length}
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {skills.map((skill) => (
           <SkillCard
             key={skill._id}
@@ -578,102 +469,89 @@ function SkillCard({
 }) {
   const current = Number(skill.currentLevel || 0)
   const target = Number(skill.targetLevel || 100)
-
   const gap = Math.max(target - current, 0)
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-3xl border bg-gradient-to-br p-6 ${config.className}`}
-    >
-      <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10 blur-3xl" />
+    <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border bg-gradient-to-br p-4 sm:p-5 lg:p-6 ${config.className}`}>
+      <div className="absolute -right-12 -top-12 h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-white/5 blur-2xl" />
 
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h4 className="text-2xl font-bold text-white">
-              {skill.skillName}
-            </h4>
+      <div className="relative z-10 flex flex-col h-full justify-between">
+        <div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h4 className="text-xl sm:text-2xl font-bold text-white truncate group-hover:text-clip">
+                {skill.skillName}
+              </h4>
+              <p className="mt-0.5 text-xs sm:text-sm opacity-75 truncate">
+                {skill.learningSource || "No learning source"}
+              </p>
+            </div>
 
-            <p className="mt-1 text-sm opacity-80">
-              {skill.learningSource || "No learning source"}
-            </p>
+            <button
+              onClick={() => onDelete(skill._id)}
+              className="rounded-xl bg-red-500/10 p-2 sm:p-2.5 text-red-300 transition hover:bg-red-500/20 shrink-0"
+              aria-label="Delete Skill"
+            >
+              <Trash2 size={16} />
+            </button>
           </div>
 
-          <button
-            onClick={() => onDelete(skill._id)}
-            className="rounded-2xl bg-red-500/20 p-3 text-red-200 transition hover:bg-red-500/30"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
-
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          <MiniStat label="Level" value={`${current}%`} />
-          <MiniStat label="Target" value={`${target}%`} />
-          <MiniStat label="Gap" value={`${gap}%`} />
-        </div>
-
-        <div className="mt-6">
-          <div className="mb-2 flex justify-between text-sm">
-            <span>Progress</span>
-            <span>{current}%</span>
+          {/* Stats Badges Dashboard Grid */}
+          <div className="mt-4 sm:mt-5 grid grid-cols-3 gap-2">
+            <MiniStat label="Level" value={`${current}%`} />
+            <MiniStat label="Target" value={`${target}%`} />
+            <MiniStat label="Gap" value={`${gap}%`} />
           </div>
 
-          <div className="h-3 overflow-hidden rounded-full bg-black/30">
-            <div
-              className="h-full rounded-full bg-white"
-              style={{
-                width: `${current}%`,
-              }}
+          {/* Progress Slider Wrapper */}
+          <div className="mt-4 sm:mt-5">
+            <div className="mb-1.5 flex justify-between text-xs sm:text-sm font-medium">
+              <span className="opacity-80">Progress</span>
+              <span className="font-bold">{current}%</span>
+            </div>
+
+            <div className="h-2 w-full overflow-hidden rounded-full bg-black/20">
+              <div
+                className="h-full rounded-full bg-white transition-all duration-300"
+                style={{ width: `${current}%` }}
+              />
+            </div>
+
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={current}
+              onChange={(e) => onLevelUpdate(skill, e.target.value)}
+              className="mt-3 w-full h-1.5 bg-transparent accent-white cursor-pointer"
             />
           </div>
 
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={current}
-            onChange={(e) =>
-              onLevelUpdate(skill, e.target.value)
-            }
-            className="mt-4 w-full"
-          />
+          {/* Core Info Row */}
+          <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2">
+            <MiniStat label="Practice" value={`${skill.totalPracticeHours || 0}h`} />
+            <MiniStat label="Confidence" value={`${skill.confidenceLevel || 3}/5`} />
+          </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <MiniStat
-            label="Practice"
-            value={`${skill.totalPracticeHours || 0}h`}
-          />
+        <div>
+          {skill.weakTopics?.length > 0 && (
+            <TagSection title="Weak Topics" tags={skill.weakTopics} />
+          )}
 
-          <MiniStat
-            label="Confidence"
-            value={`${skill.confidenceLevel || 3}/5`}
-          />
+          {skill.strongTopics?.length > 0 && (
+            <TagSection title="Strong Topics" tags={skill.strongTopics} />
+          )}
+
+          <button
+            type="button"
+            onClick={() => onPracticeHourAdd(skill)}
+            className="mt-5 sm:mt-6 flex w-full items-center justify-center gap-1.5 rounded-xl sm:rounded-2xl bg-black/15 px-3 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-black/25 active:scale-[0.99]"
+          >
+            <Plus size={16} />
+            Add 1 Practice Hour
+          </button>
         </div>
-
-        {skill.weakTopics?.length > 0 && (
-          <TagSection
-            title="Weak Topics"
-            tags={skill.weakTopics}
-          />
-        )}
-
-        {skill.strongTopics?.length > 0 && (
-          <TagSection
-            title="Strong Topics"
-            tags={skill.strongTopics}
-          />
-        )}
-
-        <button
-          type="button"
-          onClick={() => onPracticeHourAdd(skill)}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-black/20 px-4 py-3 font-semibold text-white transition hover:bg-black/30"
-        >
-          <Plus size={18} />
-          Add 1 Practice Hour
-        </button>
       </div>
     </div>
   )
@@ -681,64 +559,72 @@ function SkillCard({
 
 function ReadinessRing({ value }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/20 p-6 text-center">
+    <div className="flex sm:flex-row lg:flex-col items-center justify-between sm:justify-start lg:justify-center gap-4 rounded-xl sm:rounded-2xl border border-white/5 bg-black/10 p-3.5 sm:p-4 text-left lg:text-center w-full lg:w-40">
       <div
-        className="mx-auto flex h-28 w-28 items-center justify-center rounded-full"
+        className="flex h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 shrink-0 items-center justify-center rounded-full"
         style={{
-          background: `conic-gradient(rgb(34 211 238) ${value}%, rgba(255,255,255,0.1) 0)`,
+          background: `conic-gradient(rgb(34 211 238) ${value}%, rgba(255,255,255,0.08) 0)`,
         }}
       >
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-950">
-          <span className="text-2xl font-bold text-white">
+        <div className="flex h-12 w-12 sm:h-15 sm:w-15 lg:h-18 lg:w-18 items-center justify-center rounded-full bg-slate-950">
+          <span className="text-sm sm:text-base lg:text-xl font-bold text-white">
             {value}%
           </span>
         </div>
       </div>
 
-      <p className="mt-4 text-sm text-slate-400">
-        Career Readiness
-      </p>
+      <div>
+        <p className="text-xs sm:text-sm font-medium text-slate-300">
+          Career Readiness
+        </p>
+        <p className="block sm:hidden lg:hidden text-[10px] text-slate-500 mt-0.5">
+          Overall metrics summary
+        </p>
+      </div>
     </div>
   )
 }
 
 function MetricCard({ label, value, icon: Icon }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-cyan-300">
-        <Icon size={24} />
+    <div className="rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 p-3.5 sm:p-5 backdrop-blur-xl flex flex-col justify-between">
+      <div className="mb-2 sm:mb-4 flex h-8 w-8 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-white/10 text-cyan-300 shrink-0">
+        <Icon size={18} className="sm:scale-110" />
       </div>
 
-      <p className="text-sm text-slate-400">{label}</p>
-
-      <h2 className="mt-2 text-3xl font-bold text-white">
-        {value}
-      </h2>
+      <div>
+        <p className="text-[11px] sm:text-xs font-medium text-slate-400 truncate">
+          {label}
+        </p>
+        <h2 className="mt-0.5 sm:mt-1 text-lg sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">
+          {value}
+        </h2>
+      </div>
     </div>
   )
 }
 
 function MiniStat({ label, value }) {
   return (
-    <div className="rounded-2xl bg-black/20 p-3">
-      <p className="text-xs opacity-70">{label}</p>
-      <p className="mt-1 font-bold text-white">{value}</p>
+    <div className="rounded-xl bg-black/20 p-2 sm:p-2.5 min-w-0">
+      <p className="text-[10px] sm:text-xs text-slate-400 truncate">{label}</p>
+      <p className="mt-0.5 text-xs sm:text-sm font-bold text-white truncate">{value}</p>
     </div>
   )
 }
 
 function TagSection({ title, tags }) {
   return (
-    <div className="mt-5">
-      <p className="mb-2 text-sm font-semibold text-white">
+    <div className="mt-4">
+      <p className="mb-1.5 text-xs font-semibold text-white/90">
         {title}
       </p>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
         {tags.map((tag) => (
           <span
             key={tag}
-            className="rounded-full bg-black/20 px-3 py-1 text-xs"
+            className="rounded-lg bg-black/20 px-2 py-0.5 text-[10px] sm:text-xs text-slate-200 border border-white/5 whitespace-nowrap"
           >
             {tag}
           </span>
@@ -750,112 +636,83 @@ function TagSection({ title, tags }) {
 
 function EmptySkills() {
   return (
-    <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center">
-      <BarChart3 size={54} className="mx-auto text-slate-600" />
-
-      <h3 className="mt-5 text-2xl font-bold text-white">
+    <div className="rounded-2xl border border-dashed border-white/10 p-8 sm:p-12 text-center">
+      <BarChart3 size={40} className="mx-auto text-slate-600 sm:scale-125" />
+      <h3 className="mt-4 text-lg sm:text-xl font-bold text-white">
         No Skills Added Yet
       </h3>
-
-      <p className="mt-2 text-slate-400">
-        Add your first skill to start tracking your career growth.
+      <p className="mt-1.5 text-xs sm:text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
+        Add your first skill to start tracking your career growth milestones.
       </p>
     </div>
   )
 }
 
-function Input({
-  label,
-  value,
-  onChange,
-  type = "text",
-}) {
+function Input({ label, value, onChange, type = "text" }) {
   return (
-    <label className="block">
-      <span className="text-sm text-slate-400">
+    <label className="block w-full">
+      <span className="text-xs sm:text-sm font-medium text-slate-400">
         {label}
       </span>
-
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+        className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none focus:border-cyan-500/40 focus:bg-white/10 transition"
       />
     </label>
   )
 }
 
-function RangeInput({
-  label,
-  value,
-  onChange,
-}) {
+function RangeInput({ label, value, onChange }) {
   return (
-    <label className="block">
-      <div className="flex justify-between text-sm text-slate-400">
+    <label className="block w-full">
+      <div className="flex justify-between text-xs sm:text-sm font-medium text-slate-400">
         <span>{label}</span>
-        <span>{value}%</span>
+        <span className="font-bold text-white">{value}%</span>
       </div>
-
       <input
         type="range"
         min="0"
         max="100"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-3 w-full"
+        className="mt-2 w-full h-1.5 bg-white/10 rounded-full accent-cyan-400 cursor-pointer"
       />
     </label>
   )
 }
 
-function Textarea({
-  label,
-  value,
-  onChange,
-  placeholder,
-}) {
+function Textarea({ label, value, onChange, placeholder }) {
   return (
-    <label className="block">
-      <span className="text-sm text-slate-400">
+    <label className="block w-full">
+      <span className="text-xs sm:text-sm font-medium text-slate-400">
         {label}
       </span>
-
       <textarea
-        rows="3"
+        rows="2"
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none placeholder:text-slate-600"
+        className="mt-1.5 w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-500/40 focus:bg-white/10 transition"
       />
     </label>
   )
 }
 
-function Select({
-  label,
-  value,
-  onChange,
-  options,
-}) {
+function Select({ label, value, onChange, options }) {
   return (
-    <label className="block">
-      <span className="text-sm text-slate-400">
+    <label className="block w-full">
+      <span className="text-xs sm:text-sm font-medium text-slate-400">
         {label}
       </span>
-
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white outline-none"
+        className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none focus:border-cyan-500/40 focus:bg-white/10 transition"
       >
         {options.map((option) => (
-          <option
-            key={option}
-            value={option}
-            className="bg-slate-900"
-          >
+          <option key={option} value={option} className="bg-slate-900">
             {option}
           </option>
         ))}

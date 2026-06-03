@@ -21,9 +21,9 @@ import {
 import { getStudyImprover } from "../services/api"
 
 const priorityStyle = {
-  High: "bg-red-500/20 text-red-200 border-red-400/20",
-  Medium: "bg-yellow-500/20 text-yellow-200 border-yellow-400/20",
-  Low: "bg-green-500/20 text-green-200 border-green-400/20",
+  High: "bg-red-500/10 text-red-300 border-red-500/20",
+  Medium: "bg-yellow-500/10 text-yellow-300 border-yellow-500/20",
+  Low: "bg-green-500/10 text-green-300 border-green-500/20",
 }
 
 function StudyImprover() {
@@ -44,7 +44,7 @@ function StudyImprover() {
 
       setError(
         err.response?.data?.message ||
-          "Failed to load Study Improver"
+          "Failed to load Study Improver analysis data"
       )
     } finally {
       setLoading(false)
@@ -66,15 +66,15 @@ function StudyImprover() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex min-h-[70vh] items-center justify-center">
-          <div className="rounded-3xl border border-white/10 bg-white/10 p-8 text-center backdrop-blur-xl">
-            <Loader2 className="mx-auto animate-spin text-purple-300" size={42} />
+        <div className="flex min-h-[65vh] sm:min-h-[70vh] items-center justify-center px-3 sm:px-4">
+          <div className="w-full max-w-md rounded-2xl md:rounded-3xl border border-white/5 bg-white/[0.04] p-6 sm:p-8 text-center backdrop-blur-md">
+            <Loader2 className="mx-auto animate-spin text-purple-300 h-9 w-9 sm:h-11 sm:w-11" size={42} />
 
-            <h2 className="mt-5 text-2xl font-bold text-white">
+            <h2 className="mt-4 sm:mt-5 text-lg sm:text-2xl font-bold text-white tracking-tight">
               Analyzing Your Study Pattern
             </h2>
 
-            <p className="mt-2 text-slate-400">
+            <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
               Detecting weak subjects, incomplete targets, skipped checkpoints and low preparation areas.
             </p>
           </div>
@@ -86,27 +86,33 @@ function StudyImprover() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-8">
-          <div className="flex items-center gap-4 text-red-300">
-            <AlertTriangle size={30} />
+        <div className="max-w-xl mx-auto px-2 sm:px-4">
+          <div className="rounded-2xl md:rounded-3xl border border-red-500/10 bg-red-500/[0.05] p-5 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-start gap-4 text-red-300">
+              <div className="p-2 rounded-xl bg-red-500/10 shrink-0">
+                <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8" size={30} />
+              </div>
 
-            <div>
-              <h2 className="text-2xl font-bold">
-                Study Improver failed
-              </h2>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                  Study Improver Failed
+                </h2>
 
-              <p className="mt-2 text-red-200">{error}</p>
+                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-200/80 leading-relaxed break-words">
+                  {error}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={fetchImprover}
-            className="mt-6 flex items-center gap-2 rounded-2xl bg-red-400 px-5 py-3 font-semibold text-black"
-          >
-            <RefreshCcw size={18} />
-            Retry
-          </button>
+            <button
+              type="button"
+              onClick={fetchImprover}
+              className="mt-6 flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-red-400 px-5 py-3 text-xs sm:text-sm font-bold text-black transition-transform active:scale-[0.99]"
+            >
+              <RefreshCcw size={18} className="h-4 w-4" />
+              <span>Retry Processing</span>
+            </button>
+          </div>
         </div>
       </DashboardLayout>
     )
@@ -114,39 +120,43 @@ function StudyImprover() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/10 p-8 backdrop-blur-xl">
-          <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-red-500/20 blur-3xl" />
+      <div className="space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto px-1 sm:px-4">
+        
+        {/* Main Header Strategic Dashboard Banner */}
+        <section className="relative overflow-hidden rounded-2xl md:rounded-[36px] border border-white/5 bg-white/[0.05] p-4 sm:p-6 md:p-8 backdrop-blur-md">
+          <div className="absolute -right-24 -top-24 h-48 w-48 sm:h-80 sm:w-80 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 h-48 w-48 sm:h-80 sm:w-80 rounded-full bg-red-500/10 blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-purple-500 text-white">
-                <Brain size={42} />
+          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl md:rounded-3xl bg-purple-500 text-white shadow-md">
+                <Brain className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" size={42} />
               </div>
 
-              <div>
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-purple-400/10 px-4 py-2 text-sm font-semibold text-purple-200">
-                  <TrendingDown size={16} />
-                  Weakness Diagnosis Engine
+              <div className="min-w-0">
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-purple-400/20 bg-purple-400/5 px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-purple-200">
+                  <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5" size={16} />
+                  <span>Weakness Diagnosis Engine</span>
                 </div>
 
-                <h1 className="text-4xl font-bold text-white md:text-5xl">
+                <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight">
                   Study Improver
                 </h1>
 
-                <p className="mt-4 max-w-3xl text-slate-300">
-                  Detect weak areas, skipped tasks, low preparation subjects,
-                  poor focus patterns, and generate improvement actions.
+                <p className="mt-2 text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                  Detect weak areas, skipped tasks, low preparation subjects, poor focus patterns, and generate core improvement actions dynamically.
                 </p>
               </div>
             </div>
 
-            <DiagnosisCard summary={summary} />
+            <div className="self-start sm:self-center lg:self-auto w-full sm:w-auto shrink-0">
+              <DiagnosisCard summary={summary} />
+            </div>
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
+        {/* Primary Analytical Focus Score Metrics Matrix Grid */}
+        <section className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
           <MetricCard
             icon={BookOpen}
             label="Weak Subjects"
@@ -184,36 +194,39 @@ function StudyImprover() {
           />
         </section>
 
-        <section className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-          <div className="xl:col-span-2 rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-            <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        {/* Core Content Analysis Segment Blocks Panel */}
+        <section className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 items-start">
+          
+          {/* Main Actionable AI Treatment Layout Container */}
+          <div className="lg:col-span-2 rounded-2xl md:rounded-[32px] border border-white/5 bg-white/[0.05] p-4 sm:p-6 md:p-7 backdrop-blur-md">
+            <div className="mb-5 sm:mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight">
                   AI Improvement Plan
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-400">
-                  Actionable plan generated from your real academic data.
+                <p className="mt-0.5 text-xs text-slate-400">
+                  Actionable plan generated comprehensively from your real academic workflow data.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={fetchImprover}
-                className="flex items-center gap-2 rounded-2xl bg-purple-500 px-4 py-3 font-bold text-white"
+                className="flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-purple-500 px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition-transform active:scale-[0.99] w-full sm:w-auto shrink-0"
               >
-                <RefreshCcw size={18} />
-                Refresh Analysis
+                <RefreshCcw size={18} className="h-3.5 w-3.5" />
+                <span>Refresh Analysis</span>
               </button>
             </div>
 
             {improvementPlan.length === 0 ? (
               <EmptyState
                 title="No improvement plan yet"
-                text="Add exams, notes, skills, learning logs, targets and checkpoints to generate improvement actions."
+                text="Add exams, notes, skills, learning logs, targets and checkpoints to generate structural dynamic improvement actions."
               />
             ) : (
-              <div className="space-y-5">
+              <div className="space-y-3 sm:space-y-4">
                 {improvementPlan.map((item, index) => (
                   <PlanCard
                     key={`${item.title}-${index}`}
@@ -225,126 +238,128 @@ function StudyImprover() {
             )}
           </div>
 
-          <div className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-            <h2 className="text-2xl font-bold text-white">
+          {/* Quick Critical Priority Target Selection Focus List Block */}
+          <div className="rounded-2xl md:rounded-[32px] border border-white/5 bg-white/[0.05] p-4 sm:p-6 md:p-7 backdrop-blur-md">
+            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
               Improvement Focus
             </h2>
 
-            <p className="mt-2 text-sm text-slate-400">
-              Start with these areas first.
+            <p className="mt-1 text-xs text-slate-400">
+              Start processing with these critical high-risk target spaces first.
             </p>
 
-            <div className="mt-6 space-y-4">
+            <div className="mt-4 sm:mt-6 space-y-3">
               <FocusBox
                 label="First Weak Subject"
-                value={weakSubjects[0]?.name || "No weak subject"}
+                value={weakSubjects[0]?.name || "No weak subject discovered"}
               />
 
               <FocusBox
-                label="Next Target"
-                value={incompleteTargets[0]?.title || "No pending target"}
+                label="Next Target Allocation"
+                value={incompleteTargets[0]?.title || "No pending target specified"}
               />
 
               <FocusBox
-                label="Next Checkpoint"
-                value={skippedCheckpoints[0]?.title || "No skipped checkpoint"}
+                label="Next Checkpoint Block"
+                value={skippedCheckpoints[0]?.title || "No skipped checkpoints found"}
               />
 
               <FocusBox
-                label="Weak Skill"
-                value={weakSkills[0]?.skillName || "No weak skill"}
+                label="Weak Skill Matrix"
+                value={weakSkills[0]?.skillName || "No weak skill identified"}
               />
 
               <FocusBox
-                label="Exam Risk"
-                value={lowPreparedExams[0]?.subject || "No exam risk"}
+                label="Exam Risk Level"
+                value={lowPreparedExams[0]?.subject || "No exam risk identified"}
               />
             </div>
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+        {/* Detailed Individual Weak Points Component Streams Panel */}
+        <section className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
           <DataPanel
             title="Weak Subjects / Topics"
             icon={BookOpen}
-            empty="No weak subjects detected."
+            empty="No weak subjects or chapters detected inside metrics logs."
             items={weakSubjects}
             render={(item) => (
-              <>
-                <h3 className="text-xl font-bold text-white">
+              <div className="space-y-1.5">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight break-words">
                   {item.name}
                 </h3>
 
-                <p className="mt-2 text-slate-400">
-                  Found {item.count} times
+                <p className="text-xs font-semibold text-purple-300">
+                  Discovered Logged Occurrence Count: {item.count} times
                 </p>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed break-words">
                   {item.reason}
                 </p>
-              </>
+              </div>
             )}
           />
 
           <DataPanel
             title="Low Prepared Exams"
             icon={CalendarDays}
-            empty="No low-prepared exams."
+            empty="No low-prepared exams detected inside systems schedules."
             items={lowPreparedExams}
             render={(item) => (
-              <>
-                <h3 className="text-xl font-bold text-white">
+              <div className="space-y-1">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight break-words">
                   {item.subject}
                 </h3>
 
-                <p className="mt-2 text-slate-400">
-                  Preparation: {item.preparationLevel || 0}%
+                <p className="text-xs sm:text-sm text-slate-300">
+                  Preparation Baseline Status Level: <span className="text-red-400 font-bold">{item.preparationLevel || 0}%</span>
                 </p>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Priority: {item.priority}
+                <p className="text-xs text-slate-400">
+                  Assigned Engine Priority Matrix: <span className="text-yellow-300 font-medium">{item.priority}</span>
                 </p>
-              </>
+              </div>
             )}
           />
 
           <DataPanel
             title="Incomplete Targets"
             icon={Target}
-            empty="No incomplete targets."
+            empty="No incomplete targets or objectives remaining current."
             items={incompleteTargets}
             render={(item) => (
-              <>
-                <h3 className="text-xl font-bold text-white">
+              <div className="space-y-1">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight break-words">
                   {item.title}
                 </h3>
 
-                <p className="mt-2 text-slate-400">
-                  Progress: {item.progress || 0}% · {item.priority}
+                <p className="text-xs sm:text-sm text-slate-300">
+                  Current Trajectory Progress: <span className="text-purple-300 font-bold">{item.progress || 0}%</span> · Priority: <span className="text-slate-400">{item.priority}</span>
                 </p>
-              </>
+              </div>
             )}
           />
 
           <DataPanel
             title="Weak Skills"
             icon={BarChart3}
-            empty="No weak skills detected."
+            empty="No weak skill parameters identified inside logs database."
             items={weakSkills}
             render={(item) => (
-              <>
-                <h3 className="text-xl font-bold text-white">
+              <div className="space-y-1.5">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight break-words">
                   {item.skillName}
                 </h3>
 
-                <p className="mt-2 text-slate-400">
-                  Current: {item.currentLevel || 0}% · Target: {item.targetLevel || 100}%
+                <p className="text-xs sm:text-sm text-slate-300">
+                  Current Level: <span className="text-red-400 font-bold">{item.currentLevel || 0}%</span> · Target Threshold Goal: <span className="text-green-400 font-bold">{item.targetLevel || 100}%</span>
                 </p>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Category: {item.category}
+                <p className="text-xs text-slate-400 tracking-wide">
+                  Skill Category Class: <span className="text-slate-300 font-medium">{item.category}</span>
                 </p>
-              </>
+              </div>
             )}
           />
         </section>
@@ -370,66 +385,72 @@ function DiagnosisCard({ summary }) {
       : "No Data"
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/20 p-6 text-center">
-      <Flame className="mx-auto text-purple-300" size={36} />
+    <div className="rounded-xl sm:rounded-2xl border border-white/5 bg-black/30 p-4 sm:p-6 text-center flex items-center sm:flex-col justify-between sm:justify-center gap-4 max-w-full sm:min-w-[170px]">
+      <div className="p-2 sm:p-0 rounded-xl bg-white/5 sm:bg-transparent shrink-0">
+        <Flame className="mx-auto text-purple-300 h-6 w-6 sm:h-9 sm:w-9" size={36} />
+      </div>
 
-      <h2 className="mt-3 text-3xl font-bold text-white">
-        {level}
-      </h2>
+      <div className="text-right sm:text-center min-w-0">
+        <h2 className="text-base sm:text-2xl font-black text-white tracking-tight truncate">
+          {level}
+        </h2>
 
-      <p className="mt-1 text-sm text-slate-400">
-        Improvement Status
-      </p>
+        <p className="text-[10px] sm:text-xs text-slate-400 uppercase font-medium tracking-wider mt-0.5 whitespace-nowrap">
+          Improvement Status
+        </p>
+      </div>
     </div>
   )
 }
 
 function MetricCard({ label, value, icon: Icon }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-xl">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-purple-300">
-        <Icon size={22} />
+    <div className="rounded-xl sm:rounded-2xl border border-white/5 bg-white/[0.04] p-3.5 sm:p-5 backdrop-blur-md flex items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+      <div className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-white/5 text-purple-300">
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" size={22} />
       </div>
 
-      <p className="text-sm text-slate-400">
-        {label}
-      </p>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] sm:text-xs font-medium text-slate-400 truncate">
+          {label}
+        </p>
 
-      <h2 className="mt-2 text-2xl font-bold text-white">
-        {value}
-      </h2>
+        <h2 className="mt-0.5 text-base sm:text-xl md:text-2xl font-black text-white tracking-tight truncate">
+          {value}
+        </h2>
+      </div>
     </div>
   )
 }
 
 function PlanCard({ item, index }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/20 p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-500 text-white font-bold">
-              {index + 1}
-            </span>
+    <div className="rounded-xl sm:rounded-2xl border border-white/5 bg-black/20 p-4 sm:p-6 transition-colors duration-150 hover:border-white/10">
+      <div className="flex flex-col gap-3 min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex h-7 w-7 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-purple-500 text-white text-xs sm:text-sm font-bold shadow-sm">
+            {index + 1}
+          </span>
 
-            <span
-              className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-                priorityStyle[item.priority] || priorityStyle.Medium
-              }`}
-            >
-              {item.priority} Priority
-            </span>
+          <span
+            className={`rounded-full border px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold ${
+              priorityStyle[item.priority] || priorityStyle.Medium
+            }`}
+          >
+            {item.priority} Priority
+          </span>
 
-            <span className="rounded-full bg-purple-500/20 px-3 py-1 text-xs font-semibold text-purple-200">
-              {item.type}
-            </span>
-          </div>
+          <span className="rounded-full bg-purple-500/10 border border-purple-500/10 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold text-purple-200 uppercase tracking-wide">
+            {item.type}
+          </span>
+        </div>
 
-          <h3 className="mt-4 text-2xl font-bold text-white">
+        <div className="min-w-0 space-y-1.5">
+          <h3 className="text-base sm:text-xl font-bold text-white tracking-tight break-words">
             {item.title}
           </h3>
 
-          <p className="mt-3 leading-7 text-slate-300">
+          <p className="text-xs sm:text-sm leading-relaxed text-slate-300 break-words">
             {item.action}
           </p>
         </div>
@@ -440,65 +461,61 @@ function PlanCard({ item, index }) {
 
 function FocusBox({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <p className="text-sm text-slate-500">
+    <div className="rounded-xl border border-white/5 bg-black/20 p-3 sm:p-4 flex items-center justify-between gap-4">
+      <p className="text-xs sm:text-sm font-medium text-slate-400 truncate">
         {label}
       </p>
 
-      <h3 className="mt-1 font-bold text-white">
+      <h3 className="text-xs sm:text-sm font-bold text-white text-right break-all max-w-[60%]">
         {value}
       </h3>
     </div>
   )
 }
 
-function DataPanel({
-  title,
-  icon: Icon,
-  empty,
-  items,
-  render,
-}) {
+function DataPanel({ title, icon: Icon, empty, items, render }) {
   return (
-    <div className="rounded-[32px] border border-white/10 bg-white/10 p-7 backdrop-blur-xl">
-      <div className="mb-6 flex items-center gap-3">
-        <Icon className="text-purple-300" size={28} />
+    <div className="rounded-2xl md:rounded-[32px] border border-white/5 bg-white/[0.05] p-4 sm:p-6 md:p-7 backdrop-blur-md flex flex-col h-full">
+      <div className="mb-4 sm:mb-5 flex items-center gap-2.5">
+        <Icon className="text-purple-300 h-5 w-5 sm:h-6 sm:w-6 shrink-0" size={28} />
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-base sm:text-xl font-bold text-white tracking-tight truncate">
           {title}
         </h2>
       </div>
 
-      {items.length === 0 ? (
-        <p className="text-sm text-slate-400">
-          {empty}
-        </p>
-      ) : (
-        <div className="space-y-4">
-          {items.map((item) => (
-            <div
-              key={item._id || item.name}
-              className="rounded-2xl border border-white/10 bg-black/20 p-5"
-            >
-              {render(item)}
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="flex-1 flex flex-col justify-center">
+        {items.length === 0 ? (
+          <p className="text-xs sm:text-sm text-slate-400 py-4 italic">
+            {empty}
+          </p>
+        ) : (
+          <div className="space-y-3 w-full">
+            {items.map((item, index) => (
+              <div
+                key={item._id || item.name || index}
+                className="rounded-xl border border-white/5 bg-black/20 p-4 transition-all duration-150 hover:border-white/10"
+              >
+                {render(item)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
 function EmptyState({ title, text }) {
   return (
-    <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center">
-      <Brain size={54} className="mx-auto text-slate-600" />
+    <div className="rounded-xl sm:rounded-2xl border border-dashed border-white/5 p-6 sm:p-12 text-center my-auto w-full">
+      <Brain className="mx-auto text-slate-600 h-8 w-8 sm:h-12 sm:w-12" size={54} />
 
-      <h3 className="mt-5 text-2xl font-bold text-white">
+      <h3 className="mt-4 text-base sm:text-xl font-bold text-white truncate">
         {title}
       </h3>
 
-      <p className="mt-2 text-slate-400">
+      <p className="mt-1 text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
         {text}
       </p>
     </div>
