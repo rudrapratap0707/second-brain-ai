@@ -242,3 +242,8 @@ export const getDashboardStats = async () => {
 
   return response.data
 }
+
+export const updateProfile = async (profileData) => {
+  const response = await API.put("/auth/profile", profileData)
+  return response.data
+}

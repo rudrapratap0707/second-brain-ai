@@ -7,6 +7,7 @@ const {
   loginUser,
   getProfile,
   forgotPassword,
+  updateProfile,
   resetPassword,
 } = require("../controllers/authController")
 
@@ -18,6 +19,8 @@ router.post("/login", loginUser)
 
 // PROFILE
 router.get("/profile", protect, getProfile)
+
+router.put("/profile", protect, updateProfile)
 
 // FORGOT PASSWORD
 router.post(
