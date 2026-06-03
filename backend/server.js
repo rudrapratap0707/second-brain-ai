@@ -67,6 +67,11 @@ app.use("/api/student-life", studentLifeRoutes)
 app.use("/api/search", searchRoutes)
 
 app.use(
+  "/uploads/documents",
+  express.static(path.join(__dirname, "uploads", "documents"))
+)
+
+app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"))
 )
