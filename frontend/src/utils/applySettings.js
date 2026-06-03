@@ -1,6 +1,4 @@
 export const applySettings = (settings) => {
-  if (!settings) return
-
   const root = document.documentElement
 
   root.classList.remove(
@@ -12,26 +10,39 @@ export const applySettings = (settings) => {
     "compact-mode"
   )
 
+  // DEFAULT SETTINGS
+  const finalSettings = {
+    theme: settings?.theme || "dark",
+    fontSize:
+      settings?.fontSize || "medium",
+    compactMode:
+      settings?.compactMode || false,
+  }
+
+  // THEME
   root.classList.add(
-    settings.theme === "light"
+    finalSettings.theme === "light"
       ? "theme-light"
       : "theme-dark"
   )
 
+  // FONT SIZE
   root.classList.add(
-    settings.fontSize === "small"
+    finalSettings.fontSize === "small"
       ? "font-small"
-      : settings.fontSize === "large"
+      : finalSettings.fontSize ===
+        "large"
       ? "font-large"
       : "font-medium"
   )
 
-  if (settings.compactMode) {
+  // COMPACT MODE
+  if (finalSettings.compactMode) {
     root.classList.add("compact-mode")
   }
 
   localStorage.setItem(
     "appSettings",
-    JSON.stringify(settings)
+    JSON.stringify(finalSettings)
   )
 }
