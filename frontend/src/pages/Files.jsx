@@ -221,6 +221,16 @@ function MiniStat({ title, value, icon: Icon, highlight }) {
 }
 
 function FileCard({ file, onDelete }) {
+  const fileUrl =
+    file.fileUrl ||
+    file.url ||
+    file.secureUrl ||
+    file.filePath
+
+  const isValidUrl =
+    fileUrl &&
+    fileUrl.startsWith("http")
+
   return (
     <article className="flex min-h-full flex-col rounded-3xl border border-white/10 bg-black/20 p-4 transition hover:bg-white/10 md:p-5">
       <div className="flex items-start gap-3">
@@ -243,28 +253,29 @@ function FileCard({ file, onDelete }) {
         </div>
       </div>
 
-      {/* FILE PREVIEW */}
-      {file.fileUrl && (
+      {isValidUrl ? (
         <a
-          href={file.fileUrl}
+          href={fileUrl}
           target="_blank"
           rel="noreferrer"
           className="mt-4 flex items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
         >
           Open File
         </a>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-yellow-400/20 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-300">
+          Old local file URL found. Delete this file and upload again.
+        </div>
       )}
 
-      {/* IMAGE PREVIEW */}
-      {file.mimeType?.startsWith(
-        "image/"
-      ) && (
-        <img
-          src={file.fileUrl}
-          alt={file.originalName}
-          className="mt-4 h-48 w-full rounded-2xl object-cover"
-        />
-      )}
+      {isValidUrl &&
+        file.mimeType?.startsWith("image/") && (
+          <img
+            src={fileUrl}
+            alt={file.originalName}
+            className="mt-4 h-48 w-full rounded-2xl object-cover"
+          />
+        )}
 
       <div className="mt-5 rounded-2xl border border-white/5 bg-black/20 p-4">
         <p className="mb-3 text-sm font-semibold text-cyan-300">
@@ -273,18 +284,14 @@ function FileCard({ file, onDelete }) {
 
         <p className="line-clamp-6 whitespace-pre-line text-sm leading-6 text-slate-400">
           {file.extractedText
-            ? file.extractedText
-                .slice(0, 500)
-                .trim()
+            ? file.extractedText.slice(0, 500).trim()
             : "No text extracted."}
         </p>
       </div>
 
       <div className="mt-5">
         <button
-          onClick={() =>
-            onDelete(file._id)
-          }
+          onClick={() => onDelete(file._id)}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-400"
         >
           <Trash2 size={17} />
@@ -294,7 +301,6 @@ function FileCard({ file, onDelete }) {
     </article>
   )
 }
-
 function EmptyFiles() {
   return (
     <div className="rounded-3xl border border-dashed border-white/20 p-8 text-center md:p-12">
