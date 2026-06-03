@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client"
 import App from "./App.jsx"
 import "./index.css"
 import { applySettings } from "./utils/applySettings"
+import "./clean-ui.css"
 
 const savedSettings = JSON.parse(
   localStorage.getItem("appSettings")

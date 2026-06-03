@@ -11,7 +11,6 @@ import {
   MessageCircle,
   Bell,
   CheckCircle2,
-  Clock3,
   Smile,
   BarChart3,
   FolderOpen,
@@ -21,9 +20,6 @@ import {
   AlertTriangle,
   Activity,
   RefreshCcw,
-  Zap,
-  CalendarDays,
-  TrendingUp,
 } from "lucide-react"
 
 function Dashboard() {
@@ -116,51 +112,34 @@ function Dashboard() {
       Sad: "😔",
       Tired: "😴",
     }
-
     return moods[mood] || "🙂"
   }
 
   const getMoodColor = (score) => {
-    if (score >= 5) return "text-green-300"
-    if (score >= 4) return "text-cyan-300"
-    if (score >= 3) return "text-yellow-300"
-    if (score >= 2) return "text-orange-300"
-    return "text-red-300"
+    if (score >= 5) return "text-green-400"
+    if (score >= 4) return "text-cyan-400"
+    if (score >= 3) return "text-yellow-400"
+    if (score >= 2) return "text-orange-400"
+    return "text-red-400"
   }
 
   const getProductivityInsight = () => {
     if (stats.pendingReminders > 0) {
-      return `You have ${stats.pendingReminders} pending reminder(s). Complete them first to improve productivity.`
+      return `You have ${stats.pendingReminders} pending tasks. Finish them up to bump up your workspace metrics.`
     }
-
     if (Number(stats.averageMoodScore) >= 4) {
-      return "Your mood trend looks strong. This is a good time for focused study or creative work."
+      return "Your mood baseline is solid right now. Perfect window for intense coding or high-focus learning."
     }
-
     if (stats.totalNotes === 0) {
-      return "Start by creating your first smart note. Your SecondBrain grows with every saved idea."
+      return "Your SecondBrain is clean. Start tracking your daily build logs by writing your first smart note."
     }
-
-    if (stats.totalFiles === 0) {
-      return "Upload your first PDF or study material to make your AI assistant more powerful."
-    }
-
-    if (stats.totalChats === 0) {
-      return "Start a conversation with your AI assistant to build your personal memory."
-    }
-
-    return "Your workspace is active. Keep adding notes, reminders, files, and mood entries consistently."
+    return "Workspace synced perfectly. Keep feeding documentation, tasks, and notes into your engine."
   }
 
   const formatDate = (value) => {
     if (!value) return "No date"
-
     const date = new Date(value)
-
-    if (Number.isNaN(date.getTime())) {
-      return "Invalid date"
-    }
-
+    if (Number.isNaN(date.getTime())) return "Invalid date"
     return date.toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
@@ -172,449 +151,231 @@ function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="page-shell mx-auto max-w-7xl space-y-5 md:space-y-8">
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
-          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-cyan-500/20 blur-3xl md:h-72 md:w-72" />
-          <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-purple-500/20 blur-3xl md:h-72 md:w-72" />
-
-          <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-300 md:h-16 md:w-16">
-                <Brain size={34} />
+      <div className="w-full mx-auto max-w-7xl space-y-4 px-2 py-3 sm:space-y-5 sm:px-4 md:space-y-6 md:py-4">
+        
+        {/* Minimalized Dynamic Welcome Banner */}
+        <section className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-5 md:p-6">
+          <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
+                <Brain size={22} />
               </div>
-
               <div className="min-w-0">
-                <h1 className="text-2xl font-extrabold leading-tight text-white sm:text-3xl md:text-5xl">
+                <h1 className="text-lg font-black text-white sm:text-xl md:text-2xl tracking-tight truncate">
                   Welcome back, {user?.name || "User"} 👋
                 </h1>
-
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-400 md:mt-4 md:text-lg">
-                  Your AI productivity dashboard is ready with live analytics.
+                <p className="mt-0.5 text-xs sm:text-sm text-slate-400 truncate">
+                  Workspace Metrics Status: <span className="text-cyan-400 font-semibold">{workspaceStatus}</span>
                 </p>
               </div>
             </div>
 
             <button
+              type="button"
               onClick={fetchDashboard}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20 sm:w-fit md:px-6 md:py-4"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/10 sm:w-fit active:scale-[0.98]"
             >
               {loading ? (
-                <Loader2 className="animate-spin" size={20} />
+                <Loader2 className="animate-spin" size={14} />
               ) : (
-                <RefreshCcw size={20} />
+                <RefreshCcw size={14} />
               )}
-              Refresh Analytics
+              <span>Refresh Analytics</span>
             </button>
           </div>
         </section>
 
+        {/* Global Notifications Panel */}
         {error && (
-          <div className="flex flex-col gap-3 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-4 text-red-300 sm:flex-row sm:items-center md:px-5">
-            <AlertTriangle size={20} />
-            <span className="text-sm md:text-base">{error}</span>
+          <div className="flex items-center gap-2.5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-300 text-xs sm:text-sm">
+            <AlertTriangle size={16} className="shrink-0 text-red-400" />
+            <span>{error}</span>
           </div>
         )}
 
-        {loading && (
-          <div className="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 text-cyan-300 md:p-6">
-            <Loader2 className="animate-spin" size={24} />
-            <span className="text-sm md:text-base">
-              Loading dashboard analytics...
-            </span>
-          </div>
-        )}
-
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Optimized Core Operational Metrics Grid */}
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 md:gap-4">
           <StatCard
             title="Total Notes"
             value={stats.totalNotes}
-            icon={<FileText size={28} />}
-            color="text-cyan-300"
-            description="Saved ideas and study notes"
+            icon={<FileText size={20} />}
+            color="text-cyan-400"
             link="/notes"
           />
-
           <StatCard
-            title="Uploaded Files"
+            title="AI Storage Vault"
             value={stats.totalFiles}
-            icon={<FolderOpen size={28} />}
-            color="text-purple-300"
-            description="PDFs and documents"
+            icon={<FolderOpen size={20} />}
+            color="text-purple-400"
             link="/files"
           />
-
           <StatCard
-            title="AI Chats"
+            title="Active Assistant Chats"
             value={stats.totalChats}
-            icon={<MessageCircle size={28} />}
-            color="text-green-300"
-            description="Persistent AI conversations"
+            icon={<MessageCircle size={20} />}
+            color="text-emerald-400"
             link="/assistant"
           />
-
           <StatCard
-            title="Workspace"
-            value={workspaceStatus}
-            icon={<Activity size={28} />}
-            color="text-yellow-300"
-            description="Overall activity status"
-            link="/dashboard"
-          />
-        </section>
-
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            title="Pending Reminders"
-            value={stats.pendingReminders}
-            icon={<Bell size={28} />}
-            color="text-orange-300"
-            description="Tasks waiting for action"
-            link="/reminders"
-          />
-
-          <StatCard
-            title="Completed Tasks"
-            value={stats.completedReminders}
-            icon={<CheckCircle2 size={28} />}
-            color="text-green-300"
-            description="Finished reminders"
-            link="/reminders"
-          />
-
-          <StatCard
-            title="Completion Rate"
+            title="Task Completion Rate"
             value={`${stats.completionRate}%`}
-            icon={<BarChart3 size={28} />}
-            color="text-cyan-300"
-            description="Reminder completion progress"
+            icon={<BarChart3 size={20} />}
+            color="text-amber-400"
             link="/reminders"
-          />
-
-          <StatCard
-            title="Average Mood"
-            value={`${stats.averageMoodScore}/5`}
-            icon={<Smile size={28} />}
-            color={getMoodColor(Number(stats.averageMoodScore))}
-            description="Emotional trend score"
-            link="/mood"
           />
         </section>
 
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-cyan-400/20 bg-cyan-500/10 p-4 md:rounded-[32px] md:p-8">
-            <div className="mb-5 flex items-center gap-3 md:mb-6">
-              <Sparkles className="text-cyan-300" size={28} />
-
-              <h2 className="text-xl font-bold text-cyan-300 md:text-3xl">
-                AI Productivity Insight
-              </h2>
+        {/* Operational Split Panel Zone */}
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_0.9fr] md:gap-5">
+          
+          {/* AI Engines Insight Frame */}
+          <div className="rounded-2xl border border-cyan-500/10 bg-cyan-500/[0.01] p-4 backdrop-blur-md sm:p-5 flex flex-col justify-between">
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <Sparkles className="text-cyan-400 shrink-0" size={18} />
+                <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-wider">
+                  AI Context Engine Insights
+                </h2>
+              </div>
+              <p className="text-xs sm:text-sm leading-relaxed text-slate-300">
+                {getProductivityInsight()}
+              </p>
             </div>
 
-            <p className="text-sm leading-7 text-slate-200 md:text-lg">
-              {getProductivityInsight()}
-            </p>
-
-            <div className="mt-6 rounded-3xl border border-white/5 bg-black/20 p-4 md:mt-8 md:p-6">
-              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm text-slate-400 md:text-base">
-                  Productivity Completion
-                </span>
-
-                <span className="text-2xl font-bold text-cyan-300 md:text-3xl">
-                  {stats.completionRate}%
-                </span>
+            <div className="mt-5 rounded-xl border border-white/[0.04] bg-black/20 p-3.5">
+              <div className="flex items-center justify-between gap-2 mb-2 text-xs text-slate-400 font-medium">
+                <span>Task Queue Completion Rate</span>
+                <span className="font-bold text-cyan-400">{stats.completionRate}%</span>
               </div>
-
-              <div className="h-3 w-full overflow-hidden rounded-full bg-white/10 md:h-4">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
                 <div
-                  className="h-full rounded-full bg-cyan-400 transition-all"
-                  style={{
-                    width: `${stats.completionRate || 0}%`,
-                  }}
+                  className="h-full rounded-full bg-cyan-400 transition-all duration-500"
+                  style={{ width: `${stats.completionRate || 0}%` }}
                 />
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
-            <div className="mb-5 flex items-center gap-3 md:mb-6">
-              <Smile className="text-purple-300" size={28} />
-
-              <h2 className="text-xl font-bold text-white md:text-3xl">
-                Latest Mood
-              </h2>
+          {/* Dynamic Compact Emotional Feedback Deck */}
+          <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md sm:p-5">
+            <div className="mb-3.5 flex items-center gap-2 border-b border-white/[0.04] pb-2">
+              <Smile className="text-purple-400 shrink-0" size={18} />
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Latest State Monitor</h2>
             </div>
 
             {stats.latestMood ? (
-              <div>
-                <div className="mb-4 text-6xl md:mb-5 md:text-7xl">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="text-4xl bg-white/5 p-2 rounded-xl shrink-0">
                   {getMoodEmoji(moodLabel)}
                 </div>
-
-                <h3 className="text-3xl font-bold text-white md:text-4xl">
-                  {moodLabel}
-                </h3>
-
-                <p
-                  className={`mt-3 text-xl font-bold md:text-2xl ${getMoodColor(
-                    Number(moodScore)
-                  )}`}
-                >
-                  Score: {moodScore}/5
-                </p>
-
-                {stats.latestMood.note && (
-                  <p className="mt-5 whitespace-pre-line text-sm text-slate-300 md:text-base">
-                    {stats.latestMood.note}
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-bold text-white tracking-tight truncate">{moodLabel}</h3>
+                  <p className={`text-xs font-semibold mt-0.5 ${getMoodColor(Number(moodScore))}`}>
+                    Sentiment Vector: {moodScore}/5
                   </p>
-                )}
-
-                <p className="mt-5 flex items-center gap-2 text-sm text-slate-500">
-                  <Clock3 size={16} />
-                  {formatDate(stats.latestMood.createdAt)}
-                </p>
+                  {stats.latestMood.note && (
+                    <p className="mt-1 text-xs text-slate-400 truncate max-w-full">
+                      {stats.latestMood.note}
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="rounded-3xl border border-dashed border-white/20 p-6 text-center text-slate-400 md:p-10">
-                <Smile size={54} className="mx-auto mb-5 text-slate-500" />
-
-                <h3 className="mb-3 text-xl font-bold text-white md:text-2xl">
-                  No Mood Logged
-                </h3>
-
-                <p className="text-sm md:text-base">
-                  Track your mood to unlock emotional insights.
-                </p>
-
-                <Link
-                  to="/mood"
-                  className="mt-6 inline-flex rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-black md:text-base"
-                >
-                  Add Mood
+              <div className="rounded-xl border border-dashed border-white/5 p-4 text-center">
+                <p className="text-xs text-slate-500 font-medium">No psychological logs registered for today.</p>
+                <Link to="/mood" className="mt-2.5 inline-flex rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-bold text-black active:scale-[0.98]">
+                  Log Current Status
                 </Link>
               </div>
             )}
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <QuickAction
-            title="Open Smart Notes"
-            description="Create notes, save ideas, and summarize them with AI."
-            icon={<FileText size={28} />}
-            link="/notes"
-            color="cyan"
-          />
-
-          <QuickAction
-            title="Open AI Assistant"
-            description="Continue old chats or start a memory-based conversation."
-            icon={<MessageCircle size={28} />}
-            link="/assistant"
-            color="purple"
-          />
-
-          <QuickAction
-            title="Upload File"
-            description="Upload PDFs and documents for AI memory."
-            icon={<FolderOpen size={28} />}
-            link="/files"
-            color="green"
-          />
-
-          <QuickAction
-            title="Add Reminder"
-            description="Plan tasks, deadlines, and priority work."
-            icon={<Bell size={28} />}
-            link="/reminders"
-            color="orange"
-          />
+        {/* Clean, Non-redundant Quick Launch Control Actions Grid */}
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:gap-4">
+          <QuickAction title="Smart Notes" icon={<FileText size={18} />} link="/notes" color="cyan" />
+          <QuickAction title="AI Core Chat" icon={<MessageCircle size={18} />} link="/assistant" color="purple" />
+          <QuickAction title="Vault Upload" icon={<FolderOpen size={18} />} link="/files" color="emerald" />
+          <QuickAction title="Add Reminders" icon={<Bell size={18} />} link="/reminders" color="amber" />
         </section>
 
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <ActivityCard
-            title="Recent Notes"
-            icon={<FileText className="text-cyan-400" size={28} />}
-            emptyText="No recent notes found."
-          >
-            {recentActivity.recentNotes?.map((note) => (
-              <div
-                key={note._id}
-                className="rounded-3xl border border-white/10 bg-white/10 p-4 md:p-5"
-              >
-                <h3 className="line-clamp-1 text-lg font-bold text-white md:text-xl">
-                  {note.title}
-                </h3>
-
-                <p className="mt-2 line-clamp-2 text-sm text-slate-400 md:text-base">
-                  {note.content}
-                </p>
-
-                <p className="mt-3 text-sm text-slate-500">
-                  {formatDate(note.createdAt)}
-                </p>
+        {/* Dynamic Activity Streaming Engine Area */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5">
+          <ActivityCard title="Recent Sync Notes" icon={<FileText className="text-cyan-400" size={18} />} emptyText="No cached notes found.">
+            {recentActivity.recentNotes?.slice(0, 2).map((note) => (
+              <div key={note._id} className="rounded-xl border border-white/[0.04] bg-black/20 p-3.5 min-w-0 w-full">
+                <h3 className="truncate text-xs sm:text-sm font-bold text-white">{note.title}</h3>
+                <p className="mt-1 line-clamp-1 text-xs text-slate-400">{note.content}</p>
+                <span className="mt-2 block text-[10px] text-slate-500 font-medium">{formatDate(note.createdAt)}</span>
               </div>
             ))}
           </ActivityCard>
 
-          <ActivityCard
-            title="Recent Files"
-            icon={<FolderOpen className="text-purple-400" size={28} />}
-            emptyText="No recent files found."
-          >
-            {recentActivity.recentFiles?.map((file) => (
-              <div
-                key={file._id}
-                className="rounded-3xl border border-white/10 bg-white/10 p-4 md:p-5"
-              >
-                <h3 className="line-clamp-1 break-all text-lg font-bold text-white md:text-xl">
-                  {file.originalName}
-                </h3>
-
-                <p className="mt-2 text-sm text-slate-400 md:text-base">
-                  {file.mimeType}
-                </p>
-
-                <p className="mt-3 text-sm text-slate-500">
-                  {formatDate(file.createdAt)}
-                </p>
+          <ActivityCard title="Recent Documents" icon={<FolderOpen className="text-purple-400" size={18} />} emptyText="No system assets uploaded.">
+            {recentActivity.recentFiles?.slice(0, 2).map((file) => (
+              <div key={file._id} className="rounded-xl border border-white/[0.04] bg-black/20 p-3.5 min-w-0 w-full">
+                <h3 className="truncate text-xs sm:text-sm font-bold text-white break-all">{file.originalName}</h3>
+                <p className="mt-0.5 text-[10px] uppercase font-bold text-slate-500">{file.mimeType?.split("/")[1] || "Doc"}</p>
+                <span className="mt-2 block text-[10px] text-slate-500 font-medium">{formatDate(file.createdAt)}</span>
               </div>
             ))}
           </ActivityCard>
         </section>
 
-        <section className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <Zap className="text-yellow-300" size={28} />
-
-            <h2 className="text-xl font-bold text-white md:text-3xl">
-              SecondBrain Control Center
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <ControlPoint
-              icon={<Brain size={28} />}
-              title="AI Memory"
-              text="Your AI assistant can use notes, files, chats, moods, and reminders."
-            />
-
-            <ControlPoint
-              icon={<TrendingUp size={28} />}
-              title="Productivity Tracking"
-              text="Your reminders and completion rate help calculate productivity flow."
-            />
-
-            <ControlPoint
-              icon={<CalendarDays size={28} />}
-              title="Daily Planning"
-              text="Use reminders and mood tracking to plan better study sessions."
-            />
-          </div>
-        </section>
       </div>
     </DashboardLayout>
   )
 }
 
-function StatCard({ title, value, icon, color, description, link }) {
+function StatCard({ title, value, icon, color, link }) {
   return (
-    <Link
-      to={link}
-      className="group rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition hover:bg-white/15 md:rounded-[32px] md:p-6"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <h3 className="text-sm font-medium text-slate-400 md:text-base">
-          {title}
-        </h3>
-
-        <div className={`${color} transition group-hover:scale-110`}>
-          {icon}
-        </div>
+    <Link to={link} className="group rounded-xl border border-white/5 bg-white/[0.01] p-3.5 backdrop-blur-md transition hover:bg-white/[0.03] flex flex-col justify-between">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 truncate">{title}</h3>
+        <div className={`${color} shrink-0 transition group-hover:scale-105`}>{icon}</div>
       </div>
-
-      <p className="mt-4 text-3xl font-bold text-white md:mt-5 md:text-5xl">
-        {value}
-      </p>
-
-      <p className="mt-3 text-sm leading-6 text-slate-500">
-        {description}
-      </p>
+      <p className="mt-3 text-xl font-black text-white sm:text-2xl tracking-tight truncate">{value}</p>
     </Link>
   )
 }
 
-function QuickAction({ title, description, icon, link, color }) {
-  const colorClasses = {
-    cyan: "bg-cyan-500/10 border-cyan-400/20 text-cyan-300",
-    purple: "bg-purple-500/10 border-purple-400/20 text-purple-300",
-    green: "bg-green-500/10 border-green-400/20 text-green-300",
-    orange: "bg-orange-500/10 border-orange-400/20 text-orange-300",
+function QuickAction({ title, icon, link, color }) {
+  const themes = {
+    cyan: "bg-cyan-500/[0.02] border-cyan-500/10 text-cyan-400 hover:bg-cyan-500/[0.06]",
+    purple: "bg-purple-500/[0.02] border-purple-500/10 text-purple-400 hover:bg-purple-500/[0.06]",
+    emerald: "bg-emerald-500/[0.02] border-emerald-500/10 text-emerald-400 hover:bg-emerald-500/[0.06]",
+    amber: "bg-amber-500/[0.02] border-amber-500/10 text-amber-400 hover:bg-amber-500/[0.06]",
   }
 
   return (
-    <Link
-      to={link}
-      className={`rounded-3xl border p-4 transition hover:scale-[1.02] md:rounded-[32px] md:p-6 ${colorClasses[color]}`}
-    >
-      <div className="mb-4 md:mb-5">{icon}</div>
-
-      <h2 className="text-xl font-bold md:text-2xl">
-        {title}
-      </h2>
-
-      <p className="mt-3 text-sm leading-6 text-slate-300">
-        {description}
-      </p>
-
-      <div className="mt-5 flex items-center gap-2 text-sm font-semibold md:mt-6">
-        <span>Open</span>
-        <ArrowRight size={18} />
+    <Link to={link} className={`rounded-xl border p-3 flex items-center justify-between gap-2 text-xs font-bold transition active:scale-[0.98] ${themes[color]}`}>
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="shrink-0">{icon}</div>
+        <span className="truncate">{title}</span>
       </div>
+      <ArrowRight size={14} className="shrink-0" />
     </Link>
   )
 }
 
 function ActivityCard({ title, icon, emptyText, children }) {
-  const hasChildren = Array.isArray(children)
-    ? children.length > 0
-    : Boolean(children)
+  const hasChildren = Array.isArray(children) ? children.length > 0 : Boolean(children)
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl md:rounded-[32px] md:p-8">
-      <div className="mb-5 flex items-center gap-3 md:mb-6">
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-md flex flex-col min-w-0 w-full">
+      <div className="mb-3.5 flex items-center gap-2 border-b border-white/[0.04] pb-2">
         {icon}
-
-        <h2 className="text-xl font-bold text-white md:text-3xl">
-          {title}
-        </h2>
+        <h2 className="text-xs font-bold text-white uppercase tracking-wider truncate">{title}</h2>
       </div>
-
-      <div className="space-y-4">
-        {hasChildren ? (
-          children
-        ) : (
-          <div className="rounded-3xl border border-dashed border-white/20 p-6 text-center text-sm text-slate-400 md:p-10 md:text-base">
+      <div className="space-y-2.5 flex-1">
+        {hasChildren ? children : (
+          <div className="rounded-xl border border-dashed border-white/5 p-6 text-center text-xs text-slate-500">
             {emptyText}
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-function ControlPoint({ icon, title, text }) {
-  return (
-    <div className="rounded-3xl border border-white/5 bg-black/20 p-4 md:p-6">
-      <div className="mb-4 text-cyan-400">{icon}</div>
-
-      <h3 className="text-xl font-bold text-white md:text-2xl">
-        {title}
-      </h3>
-
-      <p className="mt-3 text-sm leading-6 text-slate-400">
-        {text}
-      </p>
     </div>
   )
 }
