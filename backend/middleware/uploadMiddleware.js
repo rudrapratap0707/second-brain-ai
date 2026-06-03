@@ -1,14 +1,9 @@
 const multer = require("multer")
-
-const {
-  CloudinaryStorage,
-} = require("multer-storage-cloudinary")
-
+const { CloudinaryStorage } = require("multer-storage-cloudinary")
 const cloudinary = require("../config/cloudinary")
 
 const storage = new CloudinaryStorage({
-  cloudinary,
-
+  cloudinary: cloudinary,
   params: async (req, file) => ({
     folder: "second-brain-files",
     resource_type: "auto",
@@ -22,31 +17,8 @@ const storage = new CloudinaryStorage({
   }),
 })
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = [
-    "application/pdf",
-    "text/plain",
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ]
-
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true)
-  } else {
-    cb(
-      new Error(
-        "Only PDF, TXT, image, DOC, and DOCX files are allowed"
-      )
-    )
-  }
-}
-
 const upload = multer({
   storage,
-  fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024,
   },
