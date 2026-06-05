@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import DashboardLayout from "../layouts/DashboardLayout"
 import {
   FolderOpen,
@@ -50,6 +50,9 @@ function DigitalDocumentVault() {
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("All")
   const [selectedFile, setSelectedFile] = useState(null)
+  
+  // Ref to clear the HTML file input element on form submission
+  const fileInputRef = useRef(null)
 
   const [form, setForm] = useState({
     title: "",
@@ -148,6 +151,9 @@ function DigitalDocumentVault() {
       notes: "",
     })
     setSelectedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "" // Clears DOM file input completely
+    }
   }
 
   const handleCreateDocument = async () => {
@@ -184,8 +190,10 @@ function DigitalDocumentVault() {
 
   const handleDelete = async (id) => {
     try {
-      await deleteStudentDocument(id)
-      fetchDocuments()
+      if (confirm("Are you sure you want to delete this document?")) {
+        await deleteStudentDocument(id)
+        fetchDocuments()
+      }
     } catch (error) {
       console.log(error)
     }
@@ -281,6 +289,7 @@ function DigitalDocumentVault() {
               <FilePicker
                 selectedFile={selectedFile}
                 onFileSelect={handleFileSelect}
+                fileInputRef={fileInputRef}
               />
 
               <Input
@@ -372,7 +381,7 @@ function DigitalDocumentVault() {
                   onChange={(e) => setFilter(e.target.value)}
                   className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none md:py-4 md:text-base"
                 >
-                  <option className="bg-slate-900">All</option>
+                  <option key="All" className="bg-slate-900">All</option>
                   {categories.map((category) => (
                     <option key={category} value={category} className="bg-slate-900">
                       {category}
@@ -426,7 +435,7 @@ function DigitalDocumentVault() {
   )
 }
 
-function FilePicker({ selectedFile, onFileSelect }) {
+function FilePicker({ selectedFile, onFileSelect, fileInputRef }) {
   return (
     <label className="block cursor-pointer">
       <span className="text-sm text-slate-400">Select File From Device</span>
@@ -445,6 +454,7 @@ function FilePicker({ selectedFile, onFileSelect }) {
 
           <input
             type="file"
+            ref={fileInputRef}
             accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
             onChange={(e) => onFileSelect(e.target.files?.[0])}
             className="mt-4 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white outline-none md:text-sm"
@@ -471,6 +481,7 @@ function FilePicker({ selectedFile, onFileSelect }) {
   )
 }
 
+// Fixed placement order & ensures formatting runs perfectly here
 function DocumentCard({ doc, onDelete, onImportant, onVerified }) {
   const fileLink = doc.fileUrl?.startsWith("http")
     ? doc.fileUrl
@@ -675,6 +686,7 @@ function Select({ label, value, onChange, options }) {
   )
 }
 
+// Global scope helpers
 function formatDate(value) {
   if (!value) return "No date"
   const date = new Date(value)
