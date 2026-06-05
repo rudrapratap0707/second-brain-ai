@@ -12,14 +12,19 @@ const uploadFile = async (req, res) => {
 
     console.log("UPLOADED FILE:", req.file)
 
-    const cloudinaryUrl =
-      req.file.secure_url ||
-      req.file.path ||
-      req.file.url
-
     const publicId =
       req.file.public_id ||
       req.file.filename
+
+    const cloudName =
+      process.env.CLOUDINARY_CLOUD_NAME
+
+    const cloudinaryUrl =
+      req.file.secure_url ||
+      req.file.url ||
+      (publicId && cloudName
+        ? `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`
+        : req.file.path)
 
     if (
       !cloudinaryUrl ||
@@ -34,48 +39,27 @@ const uploadFile = async (req, res) => {
 
     const newFile = await File.create({
       user: req.user._id || req.user.id,
-
-      originalName:
-        req.file.originalname,
-
-      fileName:
-        req.file.originalname,
-
-      filePath:
-        cloudinaryUrl,
-
-      fileUrl:
-        cloudinaryUrl,
-
-      cloudinaryPublicId:
-        publicId,
-
-      mimeType:
-        req.file.mimetype,
-
-      size:
-        req.file.size,
-
+      originalName: req.file.originalname,
+      fileName: req.file.originalname,
+      filePath: cloudinaryUrl,
+      fileUrl: cloudinaryUrl,
+      cloudinaryPublicId: publicId,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
       extractedText:
         "File uploaded successfully. AI extraction for Cloudinary files will be added later.",
     })
 
     res.status(201).json({
-      message:
-        "File uploaded successfully",
+      message: "File uploaded successfully",
       file: newFile,
     })
   } catch (error) {
-    console.log(
-      "UPLOAD ERROR:",
-      error
-    )
+    console.log("UPLOAD ERROR:", error)
 
     res.status(500).json({
-      message:
-        "File upload failed",
-      error:
-        error.message,
+      message: "File upload failed",
+      error: error.message,
     })
   }
 }
