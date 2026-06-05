@@ -1037,31 +1037,90 @@ const createStudentDocument = async (req, res) => {
 
     const file = req.file
 
-    const document = await StudentDocument.create({
-      user: userId,
-      title: req.body.title,
-      category: req.body.category,
-      documentType: req.body.documentType,
-      issuingAuthority: req.body.issuingAuthority,
-      documentDate: req.body.documentDate || null,
-      expiryDate: req.body.expiryDate || null,
-      tags: req.body.tags ? JSON.parse(req.body.tags) : [],
-      isImportant: req.body.isImportant === "true",
-      isVerified: req.body.isVerified === "true",
-      notes: req.body.notes,
+    let fileUrl = ""
+    let fileName = ""
+    let fileSize = 0
 
-      fileUrl: file ? `/uploads/documents/${file.filename}` : "",
-      fileName: file ? file.originalname : "",
-      fileSize: file ? file.size : 0,
-    })
+    if (file) {
+      const publicId =
+        file.public_id ||
+        file.filename
+
+      const cloudName =
+        process.env.CLOUDINARY_CLOUD_NAME
+
+      fileUrl =
+        file.secure_url ||
+        file.url ||
+        (publicId && cloudName
+          ? `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`
+          : "")
+
+      fileName =
+        file.originalname || ""
+
+      fileSize =
+        file.size || 0
+    }
+
+    const document =
+      await StudentDocument.create({
+        user: userId,
+
+        title: req.body.title,
+
+        category:
+          req.body.category,
+
+        documentType:
+          req.body.documentType,
+
+        issuingAuthority:
+          req.body.issuingAuthority,
+
+        documentDate:
+          req.body.documentDate ||
+          null,
+
+        expiryDate:
+          req.body.expiryDate ||
+          null,
+
+        tags: req.body.tags
+          ? JSON.parse(
+              req.body.tags
+            )
+          : [],
+
+        isImportant:
+          req.body.isImportant ===
+          "true",
+
+        isVerified:
+          req.body.isVerified ===
+          "true",
+
+        notes: req.body.notes,
+
+        fileUrl,
+        fileName,
+        fileSize,
+      })
 
     res.status(201).json({
-      message: "Document uploaded successfully",
+      message:
+        "Document uploaded successfully",
       document,
     })
   } catch (error) {
+    console.log(
+      "DOCUMENT UPLOAD ERROR:",
+      error
+    )
+
     res.status(500).json({
-      message: "Failed to upload document",
+      message:
+        "Failed to upload document",
       error: error.message,
     })
   }
