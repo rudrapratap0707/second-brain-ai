@@ -1,33 +1,57 @@
-const jwt = require("jsonwebtoken")
-const User = require("../models/User")
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
 const protect = async (req, res, next) => {
   try {
-    let token
+    let token;
 
+    // Check Authorization Header
     if (
       req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
+      req.headers.authorization.startsWith("Bearer ")
     ) {
-      token = req.headers.authorization.split(" ")[1]
+      token = req.headers.authorization.split(" ")[1];
     }
 
+    // No Token
     if (!token) {
       return res.status(401).json({
-        message: "Not authorized, no token",
-      })
+        message: "No token provided",
+      });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    console.log("========== AUTH DEBUG ==========");
+    console.log("Authorization Header:", req.headers.authorization);
+    console.log("Token:", token);
+    console.log("JWT Secret Exists:", !!process.env.JWT_SECRET);
 
-    req.user = await User.findById(decoded.id).select("-password")
+    // Verify JWT
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    next()
+    console.log("Decoded Token:", decoded);
+
+    // Find User
+    const user = await User.findById(decoded.id).select("-password");
+
+    console.log("User Found:", user);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "User not found",
+      });
+    }
+
+    req.user = user;
+
+    next();
   } catch (error) {
-    return res.status(401).json({
-      message: "Not authorized, token failed",
-    })
-  }
-}
+    console.error("========== AUTH ERROR ==========");
+    console.error(error);
 
-module.exports = protect
+    return res.status(401).json({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = protect;
