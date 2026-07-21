@@ -101,6 +101,7 @@ ${content}
 
 // MEMORY-BASED AI CHAT
 const chatWithAI = async (req, res) => {
+  console.log("🔥 NEW AI CONTROLLER RUNNING");
   try {
     const { message } = req.body
 
