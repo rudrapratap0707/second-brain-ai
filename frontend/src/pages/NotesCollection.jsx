@@ -67,6 +67,8 @@ function NotesCollection() {
 
       const data = await getAcademicNotes()
 
+      console.log("Academic Notes Response:", data) // <-- Add this line
+
       setNotes(data.notes || [])
     } catch (error) {
       console.log(error)
@@ -78,10 +80,6 @@ function NotesCollection() {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    fetchNotes()
-  }, [])
 
   const subjects = useMemo(() => {
     return [
