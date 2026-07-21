@@ -1215,25 +1215,32 @@ const deleteStudentDocument = async (req, res) => {
 // CREATE ACADEMIC NOTE
 const createAcademicNote = async (req, res) => {
   try {
+    console.log("===== CREATE NOTE API HIT =====")
+    console.log("BODY:", req.body)
+
     const userId = getUserId(req)
+    console.log("USER ID:", userId)
 
     const note = await AcademicNote.create({
       user: userId,
       ...req.body,
     })
 
+    console.log("NOTE CREATED:", note)
+
     res.status(201).json({
       message: "Academic note created successfully",
       note,
     })
   } catch (error) {
+    console.log("CREATE NOTE ERROR:", error)
+
     res.status(500).json({
       message: "Failed to create academic note",
       error: error.message,
     })
   }
 }
-
 // GET ACADEMIC NOTES
 const getAcademicNotes = async (req, res) => {
   try {
