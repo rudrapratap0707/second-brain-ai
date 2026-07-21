@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Loader2,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -29,15 +28,14 @@ function ForgotPassword() {
   const [success, setSuccess] =
     useState("")
 
-  const [resetUrl, setResetUrl] =
-    useState("")
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     setError("")
     setSuccess("")
-    setResetUrl("")
+    
 
     if (!email.trim()) {
       setError(
@@ -58,9 +56,7 @@ function ForgotPassword() {
           "Reset link generated successfully"
       )
 
-      if (data.resetUrl) {
-        setResetUrl(data.resetUrl)
-      }
+      
     } catch (err) {
       setError(
         err.response?.data
@@ -121,28 +117,7 @@ function ForgotPassword() {
           </div>
         )}
 
-        {/* DEV RESET LINK */}
-        {resetUrl && (
-          <div className="mb-5 rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <Sparkles
-                size={16}
-                className="text-cyan-400"
-              />
-
-              <p className="text-sm font-semibold text-cyan-300">
-                Development Reset Link
-              </p>
-            </div>
-
-            <a
-              href={resetUrl}
-              className="block break-all text-sm leading-7 text-slate-300 transition hover:text-cyan-300"
-            >
-              {resetUrl}
-            </a>
-          </div>
-        )}
+        
 
         {/* FORM */}
         <form

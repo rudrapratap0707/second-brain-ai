@@ -1,6 +1,6 @@
 const axios = require("axios")
 
-const Note = require("../models/Note")
+const AcademicNote = require("../models/AcademicNotes")
 const File = require("../models/File")
 
 const GEMINI_MODELS = [
@@ -118,34 +118,70 @@ const chatWithAI = async (req, res) => {
     let filesContext = ""
     let filesCount = 0
 
-    // FETCH USER NOTES
+    // FETCH USER ACADEMIC NOTES (Student Life OS)
     try {
-      const notes = await Note.find({
+      const notes = await AcademicNote.find({
         user: userId,
       })
-        .sort({ createdAt: -1 })
-        .limit(20)
+        .sort({ updatedAt: -1 })
+        .limit(50)
 
       notesCount = notes.length
 
-      notesContext = notes
-        .map((note, index) => {
-          return `
-Note ${index + 1}
-Title: ${note.title}
-Content: ${note.content}
-Created At: ${note.createdAt}
+      if (notes.length > 0) {
+        notesContext = notes
+          .map(
+            (note, index) => `
+==============================
+ACADEMIC NOTE ${index + 1}
+
+Title:
+${note.title}
+
+Subject:
+${note.subject}
+
+Chapter:
+${note.chapter || "N/A"}
+
+Type:
+${note.noteType}
+
+Priority:
+${note.priority}
+
+Revision Status:
+${note.revisionStatus}
+
+Important:
+${note.isImportant ? "Yes" : "No"}
+
+Tags:
+${note.tags?.length ? note.tags.join(", ") : "None"}
+
+Content:
+${note.content}
+
+AI Summary:
+${note.aiSummary || "No summary available"}
+
+Created:
+${note.createdAt}
+
+==============================
 `
-        })
-        .join("\n")
+          )
+          .join("\n\n")
+      } else {
+        notesContext = "No Academic Notes found."
+      }
     } catch (noteError) {
       console.log(
-        "NOTES FETCH ERROR:",
+        "ACADEMIC NOTES FETCH ERROR:",
         noteError.message
       )
 
-      notesContext =
-        "Could not fetch saved notes."
+      notesContext = "Could not fetch Academic Notes."
     }
 
     // FETCH USER UPLOADED FILES
@@ -158,9 +194,10 @@ Created At: ${note.createdAt}
 
       filesCount = files.length
 
-      filesContext = files
-        .map((file, index) => {
-          return `
+      if (files.length > 0) {
+        filesContext = files
+          .map((file, index) => {
+            return `
 File ${index + 1}
 File Name: ${file.originalName}
 File Type: ${file.mimeType}
@@ -172,44 +209,103 @@ ${
     : "No extracted text available."
 }
 `
-        })
-        .join("\n")
+          })
+          .join("\n")
+      } else {
+        filesContext = "No uploaded files found."
+      }
     } catch (fileError) {
       console.log(
         "FILES FETCH ERROR:",
         fileError.message
       )
 
-      filesContext =
-        "Could not fetch uploaded files."
+      filesContext = "Could not fetch uploaded files."
     }
 
     const prompt = `
-You are SecondBrain AI, a personal memory-based productivity and study assistant.
+You are SecondBrain AI, an intelligent study and productivity assistant.
 
-You can answer using:
-1. The user's saved notes
-2. The user's uploaded files and extracted PDF/document text
-3. The user's current question
+You have access to:
 
-Important rules:
-- First check uploaded files and saved notes.
-- If the answer is found in uploaded files, start with: "Based on your uploaded file..."
-- If the answer is found in saved notes, start with: "Based on your notes..."
-- If the user asks about a PDF, file, syllabus, document, uploaded material, course, semester, or study material, check uploaded files first.
-- If the answer is not found in notes or files, clearly say: "I could not find this in your saved notes or uploaded files."
-- After saying that, you may still give general helpful advice.
-- Keep answers simple, useful, and student-friendly.
-- Do not pretend that something exists in notes or files if it does not.
+1. Academic Notes (Student Life OS)
+2. Uploaded Files
+3. User Question
 
-User's saved notes:
-${notesContext || "No saved notes found."}
+----------------------------------------------------
+IMPORTANT RULES
+----------------------------------------------------
 
-User's uploaded files:
-${filesContext || "No uploaded files found."}
+Academic Notes are the PRIMARY source.
 
-User question:
+If the answer exists inside Academic Notes,
+answer ONLY using those notes.
+
+Begin the answer with:
+
+"📚 Based on your Academic Notes..."
+
+If the answer exists inside uploaded files,
+
+Begin with:
+
+"📄 Based on your uploaded files..."
+
+If information exists in both,
+combine both.
+
+If nothing exists,
+
+Say:
+
+"I couldn't find this information inside your Academic Notes or uploaded files."
+
+Then provide general knowledge.
+
+Never pretend information exists.
+
+Never hallucinate.
+
+----------------------------------------------------
+ACADEMIC NOTES
+----------------------------------------------------
+
+${notesContext}
+
+----------------------------------------------------
+UPLOADED FILES
+----------------------------------------------------
+
+${filesContext}
+
+----------------------------------------------------
+USER QUESTION
+----------------------------------------------------
+
 ${message}
+
+----------------------------------------------------
+RESPONSE STYLE
+----------------------------------------------------
+
+• Answer in Hinglish unless the user asks another language.
+• Explain simply.
+• Use bullet points.
+• Use examples whenever possible.
+• If the user asks to explain notes,
+explain every point one by one.
+• If the user asks for revision,
+create revision notes.
+• If the user asks for interview preparation,
+convert notes into interview questions.
+• If the user asks for MCQs,
+generate MCQs from Academic Notes.
+• If the user asks for flashcards,
+generate flashcards from Academic Notes.
+
+Remember:
+
+Academic Notes > Uploaded Files > General Knowledge.
 `
 
     const reply = await callGemini(prompt)
