@@ -1,6 +1,6 @@
 const axios = require("axios")
 
-const AcademicNote = require("../models/AcademicNotes")
+const AcademicNote = require("../models/AcademicNote")
 const File = require("../models/File")
 
 const GEMINI_MODELS = [
