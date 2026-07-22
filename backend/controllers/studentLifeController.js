@@ -6,54 +6,46 @@ const Target = require("../models/Target")
 const Checkpoint = require("../models/Checkpoint")
 const SkillProgress = require("../models/SkillProgress")
 const LearningLog = require("../models/LearningLog")
-
-const Note = require("../models/Note")
-
+const Note = require("../models/Note") // Using central Note model
 const StudentDocument = require("../models/StudentDocument")
+
+// Helper: Get User ID safely
 const getUserId = (req) => {
   return req.user?._id || req.user?.id
 }
 
+// 1. DASHBOARD ANALYTICS (Optimized with Promise.all & lean)
 const getStudentLifeDashboard = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const profile = await StudentProfile.findOne({
-      user: userId,
-    })
-
-    const studySessions = await StudySession.find({
-      user: userId,
-    }).sort({ studiedAt: -1 })
-
-    const exams = await ExamSchedule.find({
-      user: userId,
-    }).sort({ examDate: 1 })
-
-    const timetable = await Timetable.find({
-      user: userId,
-      isActive: true,
-    }).sort({ startTime: 1 })
-
-    const targets = await Target.find({
-      user: userId,
-    }).sort({ dueDate: 1 })
-
-    const checkpoints = await Checkpoint.find({
-      user: userId,
-    }).sort({ dueDate: 1 })
-
-    const skills = await SkillProgress.find({
-      user: userId,
-    }).sort({ updatedAt: -1 })
-
-    const learningLogs = await LearningLog.find({
-      user: userId,
-    }).sort({ date: -1 })
+    // Parallel DB Execution for maximum performance
+    const [
+      profile,
+      studySessions,
+      exams,
+      timetable,
+      targets,
+      checkpoints,
+      skills,
+      learningLogs,
+      notesCount,
+      documentsCount,
+    ] = await Promise.all([
+      StudentProfile.findOne({ user: userId }).lean(),
+      StudySession.find({ user: userId }).sort({ studiedAt: -1 }).lean(),
+      ExamSchedule.find({ user: userId }).sort({ examDate: 1 }).lean(),
+      Timetable.find({ user: userId, isActive: true }).sort({ startTime: 1 }).lean(),
+      Target.find({ user: userId }).sort({ dueDate: 1 }).lean(),
+      Checkpoint.find({ user: userId }).sort({ dueDate: 1 }).lean(),
+      SkillProgress.find({ user: userId }).sort({ updatedAt: -1 }).lean(),
+      LearningLog.find({ user: userId }).sort({ date: -1 }).lean(),
+      Note.countDocuments({ user: userId, folder: "Academic" }),
+      StudentDocument.countDocuments({ user: userId }),
+    ])
 
     const totalStudyMinutes = studySessions.reduce(
-      (sum, session) =>
-        sum + Number(session.durationMinutes || 0),
+      (sum, session) => sum + Number(session.durationMinutes || 0),
       0
     )
 
@@ -65,9 +57,7 @@ const getStudentLifeDashboard = async (req, res) => {
 
     const successRate =
       totalCheckpoints > 0
-        ? Math.round(
-            (completedCheckpoints / totalCheckpoints) * 100
-          )
+        ? Math.round((completedCheckpoints / totalCheckpoints) * 100)
         : 0
 
     const completedTargets = targets.filter(
@@ -76,9 +66,7 @@ const getStudentLifeDashboard = async (req, res) => {
 
     const targetProgressRate =
       targets.length > 0
-        ? Math.round(
-            (completedTargets / targets.length) * 100
-          )
+        ? Math.round((completedTargets / targets.length) * 100)
         : 0
 
     const upcomingExams = exams.filter(
@@ -97,8 +85,7 @@ const getStudentLifeDashboard = async (req, res) => {
       profile,
       analytics: {
         totalStudyMinutes,
-        totalStudyHours:
-          Math.round((totalStudyMinutes / 60) * 10) / 10,
+        totalStudyHours: Math.round((totalStudyMinutes / 60) * 10) / 10,
         totalStudySessions: studySessions.length,
         totalTargets: targets.length,
         completedTargets,
@@ -108,6 +95,8 @@ const getStudentLifeDashboard = async (req, res) => {
         successRate,
         totalSkills: skills.length,
         totalExams: exams.length,
+        notesCount,
+        documentsCount,
       },
       recent: {
         studySessions: studySessions.slice(0, 5),
@@ -131,23 +120,18 @@ const getStudentLifeDashboard = async (req, res) => {
   }
 }
 
+// 2. PROFILE CONTROLLERS
 const getStudentProfile = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    let profile = await StudentProfile.findOne({
-      user: userId,
-    })
+    let profile = await StudentProfile.findOne({ user: userId }).lean()
 
     if (!profile) {
-      profile = await StudentProfile.create({
-        user: userId,
-      })
+      profile = await StudentProfile.create({ user: userId })
     }
 
-    res.status(200).json({
-      profile,
-    })
+    res.status(200).json({ profile })
   } catch (error) {
     res.status(500).json({
       message: "Failed to get student profile",
@@ -161,18 +145,9 @@ const updateStudentProfile = async (req, res) => {
     const userId = getUserId(req)
 
     const profile = await StudentProfile.findOneAndUpdate(
-      {
-        user: userId,
-      },
-      {
-        ...req.body,
-        user: userId,
-      },
-      {
-        new: true,
-        upsert: true,
-        runValidators: true,
-      }
+      { user: userId },
+      { ...req.body, user: userId },
+      { new: true, upsert: true, runValidators: true }
     )
 
     res.status(200).json({
@@ -187,9 +162,14 @@ const updateStudentProfile = async (req, res) => {
   }
 }
 
+// 3. TARGET CONTROLLERS
 const createTarget = async (req, res) => {
   try {
     const userId = getUserId(req)
+
+    if (!req.body.title) {
+      return res.status(400).json({ message: "Target title is required" })
+    }
 
     const target = await Target.create({
       user: userId,
@@ -212,16 +192,11 @@ const getTargets = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const targets = await Target.find({
-      user: userId,
-    }).sort({
-      dueDate: 1,
-      createdAt: -1,
-    })
+    const targets = await Target.find({ user: userId })
+      .sort({ dueDate: 1, createdAt: -1 })
+      .lean()
 
-    res.status(200).json({
-      targets,
-    })
+    res.status(200).json({ targets })
   } catch (error) {
     res.status(500).json({
       message: "Failed to get targets",
@@ -235,21 +210,13 @@ const updateTarget = async (req, res) => {
     const userId = getUserId(req)
 
     const target = await Target.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        user: userId,
-      },
+      { _id: req.params.id, user: userId },
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     )
 
     if (!target) {
-      return res.status(404).json({
-        message: "Target not found",
-      })
+      return res.status(404).json({ message: "Target not found" })
     }
 
     res.status(200).json({
@@ -274,14 +241,10 @@ const deleteTarget = async (req, res) => {
     })
 
     if (!target) {
-      return res.status(404).json({
-        message: "Target not found",
-      })
+      return res.status(404).json({ message: "Target not found" })
     }
 
-    res.status(200).json({
-      message: "Target deleted successfully",
-    })
+    res.status(200).json({ message: "Target deleted successfully" })
   } catch (error) {
     res.status(500).json({
       message: "Failed to delete target",
@@ -290,149 +253,106 @@ const deleteTarget = async (req, res) => {
   }
 }
 
-
-// CREATE CHECKPOINT
-const createCheckpoint = async (
-  req,
-  res
-) => {
+// 4. CHECKPOINT CONTROLLERS
+const createCheckpoint = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const checkpoint =
-      await Checkpoint.create({
-        user: userId,
-        ...req.body,
-      })
+    if (!req.body.title) {
+      return res.status(400).json({ message: "Checkpoint title is required" })
+    }
+
+    const checkpoint = await Checkpoint.create({
+      user: userId,
+      ...req.body,
+    })
 
     res.status(201).json({
-      message:
-        "Checkpoint created successfully",
+      message: "Checkpoint created successfully",
       checkpoint,
     })
   } catch (error) {
     res.status(500).json({
-      message:
-        "Failed to create checkpoint",
+      message: "Failed to create checkpoint",
       error: error.message,
     })
   }
 }
 
-// GET CHECKPOINTS
-const getCheckpoints = async (
-  req,
-  res
-) => {
+const getCheckpoints = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const checkpoints =
-      await Checkpoint.find({
-        user: userId,
-      })
-        .populate(
-          "target",
-          "title category"
-        )
-        .sort({
-          dueDate: 1,
-          createdAt: -1,
-        })
+    const checkpoints = await Checkpoint.find({ user: userId })
+      .populate("target", "title category")
+      .sort({ dueDate: 1, createdAt: -1 })
+      .lean()
 
-    res.status(200).json({
-      checkpoints,
-    })
+    res.status(200).json({ checkpoints })
   } catch (error) {
     res.status(500).json({
-      message:
-        "Failed to fetch checkpoints",
+      message: "Failed to fetch checkpoints",
       error: error.message,
     })
   }
 }
 
-// UPDATE CHECKPOINT
-const updateCheckpoint = async (
-  req,
-  res
-) => {
+const updateCheckpoint = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const checkpoint =
-      await Checkpoint.findOneAndUpdate(
-        {
-          _id: req.params.id,
-          user: userId,
-        },
-        req.body,
-        {
-          new: true,
-          runValidators: true,
-        }
-      )
+    const checkpoint = await Checkpoint.findOneAndUpdate(
+      { _id: req.params.id, user: userId },
+      req.body,
+      { new: true, runValidators: true }
+    )
 
     if (!checkpoint) {
-      return res.status(404).json({
-        message:
-          "Checkpoint not found",
-      })
+      return res.status(404).json({ message: "Checkpoint not found" })
     }
 
     res.status(200).json({
-      message:
-        "Checkpoint updated successfully",
+      message: "Checkpoint updated successfully",
       checkpoint,
     })
   } catch (error) {
     res.status(500).json({
-      message:
-        "Failed to update checkpoint",
+      message: "Failed to update checkpoint",
       error: error.message,
     })
   }
 }
 
-// DELETE CHECKPOINT
-const deleteCheckpoint = async (
-  req,
-  res
-) => {
+const deleteCheckpoint = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const checkpoint =
-      await Checkpoint.findOneAndDelete({
-        _id: req.params.id,
-        user: userId,
-      })
+    const checkpoint = await Checkpoint.findOneAndDelete({
+      _id: req.params.id,
+      user: userId,
+    })
 
     if (!checkpoint) {
-      return res.status(404).json({
-        message:
-          "Checkpoint not found",
-      })
+      return res.status(404).json({ message: "Checkpoint not found" })
     }
 
-    res.status(200).json({
-      message:
-        "Checkpoint deleted successfully",
-    })
+    res.status(200).json({ message: "Checkpoint deleted successfully" })
   } catch (error) {
     res.status(500).json({
-      message:
-        "Failed to delete checkpoint",
+      message: "Failed to delete checkpoint",
       error: error.message,
     })
   }
 }
 
-
-// CREATE EXAM
+// 5. EXAM CONTROLLERS
 const createExam = async (req, res) => {
   try {
     const userId = getUserId(req)
+
+    if (!req.body.subject && !req.body.title) {
+      return res.status(400).json({ message: "Subject or Exam title is required" })
+    }
 
     const exam = await ExamSchedule.create({
       user: userId,
@@ -451,21 +371,15 @@ const createExam = async (req, res) => {
   }
 }
 
-// GET EXAMS
 const getExams = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const exams = await ExamSchedule.find({
-      user: userId,
-    }).sort({
-      examDate: 1,
-      createdAt: -1,
-    })
+    const exams = await ExamSchedule.find({ user: userId })
+      .sort({ examDate: 1, createdAt: -1 })
+      .lean()
 
-    res.status(200).json({
-      exams,
-    })
+    res.status(200).json({ exams })
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch exams",
@@ -474,27 +388,18 @@ const getExams = async (req, res) => {
   }
 }
 
-// UPDATE EXAM
 const updateExam = async (req, res) => {
   try {
     const userId = getUserId(req)
 
     const exam = await ExamSchedule.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        user: userId,
-      },
+      { _id: req.params.id, user: userId },
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     )
 
     if (!exam) {
-      return res.status(404).json({
-        message: "Exam not found",
-      })
+      return res.status(404).json({ message: "Exam not found" })
     }
 
     res.status(200).json({
@@ -509,7 +414,6 @@ const updateExam = async (req, res) => {
   }
 }
 
-// DELETE EXAM
 const deleteExam = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -520,14 +424,10 @@ const deleteExam = async (req, res) => {
     })
 
     if (!exam) {
-      return res.status(404).json({
-        message: "Exam not found",
-      })
+      return res.status(404).json({ message: "Exam not found" })
     }
 
-    res.status(200).json({
-      message: "Exam deleted successfully",
-    })
+    res.status(200).json({ message: "Exam deleted successfully" })
   } catch (error) {
     res.status(500).json({
       message: "Failed to delete exam",
@@ -536,11 +436,14 @@ const deleteExam = async (req, res) => {
   }
 }
 
-
-// CREATE TIMETABLE BLOCK
+// 6. TIMETABLE CONTROLLERS
 const createTimetableBlock = async (req, res) => {
   try {
     const userId = getUserId(req)
+
+    if (!req.body.day || !req.body.startTime) {
+      return res.status(400).json({ message: "Day and Start Time are required" })
+    }
 
     const block = await Timetable.create({
       user: userId,
@@ -559,21 +462,15 @@ const createTimetableBlock = async (req, res) => {
   }
 }
 
-// GET TIMETABLE BLOCKS
 const getTimetableBlocks = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const blocks = await Timetable.find({
-      user: userId,
-    }).sort({
-      day: 1,
-      startTime: 1,
-    })
+    const blocks = await Timetable.find({ user: userId })
+      .sort({ day: 1, startTime: 1 })
+      .lean()
 
-    res.status(200).json({
-      blocks,
-    })
+    res.status(200).json({ blocks })
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch timetable blocks",
@@ -582,27 +479,18 @@ const getTimetableBlocks = async (req, res) => {
   }
 }
 
-// UPDATE TIMETABLE BLOCK
 const updateTimetableBlock = async (req, res) => {
   try {
     const userId = getUserId(req)
 
     const block = await Timetable.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        user: userId,
-      },
+      { _id: req.params.id, user: userId },
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     )
 
     if (!block) {
-      return res.status(404).json({
-        message: "Timetable block not found",
-      })
+      return res.status(404).json({ message: "Timetable block not found" })
     }
 
     res.status(200).json({
@@ -617,7 +505,6 @@ const updateTimetableBlock = async (req, res) => {
   }
 }
 
-// DELETE TIMETABLE BLOCK
 const deleteTimetableBlock = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -628,14 +515,10 @@ const deleteTimetableBlock = async (req, res) => {
     })
 
     if (!block) {
-      return res.status(404).json({
-        message: "Timetable block not found",
-      })
+      return res.status(404).json({ message: "Timetable block not found" })
     }
 
-    res.status(200).json({
-      message: "Timetable block deleted successfully",
-    })
+    res.status(200).json({ message: "Timetable block deleted successfully" })
   } catch (error) {
     res.status(500).json({
       message: "Failed to delete timetable block",
@@ -644,11 +527,14 @@ const deleteTimetableBlock = async (req, res) => {
   }
 }
 
-
-// CREATE SKILL
+// 7. SKILL CONTROLLERS
 const createSkill = async (req, res) => {
   try {
     const userId = getUserId(req)
+
+    if (!req.body.skillName) {
+      return res.status(400).json({ message: "Skill name is required" })
+    }
 
     const skill = await SkillProgress.create({
       user: userId,
@@ -667,22 +553,15 @@ const createSkill = async (req, res) => {
   }
 }
 
-// GET SKILLS
 const getSkills = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const skills = await SkillProgress.find({
-      user: userId,
-    }).sort({
-      category: 1,
-      currentLevel: -1,
-      updatedAt: -1,
-    })
+    const skills = await SkillProgress.find({ user: userId })
+      .sort({ category: 1, currentLevel: -1, updatedAt: -1 })
+      .lean()
 
-    res.status(200).json({
-      skills,
-    })
+    res.status(200).json({ skills })
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch skills",
@@ -691,27 +570,18 @@ const getSkills = async (req, res) => {
   }
 }
 
-// UPDATE SKILL
 const updateSkill = async (req, res) => {
   try {
     const userId = getUserId(req)
 
     const skill = await SkillProgress.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        user: userId,
-      },
+      { _id: req.params.id, user: userId },
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     )
 
     if (!skill) {
-      return res.status(404).json({
-        message: "Skill not found",
-      })
+      return res.status(404).json({ message: "Skill not found" })
     }
 
     res.status(200).json({
@@ -726,7 +596,6 @@ const updateSkill = async (req, res) => {
   }
 }
 
-// DELETE SKILL
 const deleteSkill = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -737,14 +606,10 @@ const deleteSkill = async (req, res) => {
     })
 
     if (!skill) {
-      return res.status(404).json({
-        message: "Skill not found",
-      })
+      return res.status(404).json({ message: "Skill not found" })
     }
 
-    res.status(200).json({
-      message: "Skill deleted successfully",
-    })
+    res.status(200).json({ message: "Skill deleted successfully" })
   } catch (error) {
     res.status(500).json({
       message: "Failed to delete skill",
@@ -753,7 +618,7 @@ const deleteSkill = async (req, res) => {
   }
 }
 
-// CREATE LEARNING LOG
+// 8. LEARNING LOG CONTROLLERS
 const createLearningLog = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -775,21 +640,15 @@ const createLearningLog = async (req, res) => {
   }
 }
 
-// GET LEARNING LOGS
 const getLearningLogs = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const logs = await LearningLog.find({
-      user: userId,
-    }).sort({
-      date: -1,
-      createdAt: -1,
-    })
+    const logs = await LearningLog.find({ user: userId })
+      .sort({ date: -1, createdAt: -1 })
+      .lean()
 
-    res.status(200).json({
-      logs,
-    })
+    res.status(200).json({ logs })
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch learning logs",
@@ -798,27 +657,18 @@ const getLearningLogs = async (req, res) => {
   }
 }
 
-// UPDATE LEARNING LOG
 const updateLearningLog = async (req, res) => {
   try {
     const userId = getUserId(req)
 
     const log = await LearningLog.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        user: userId,
-      },
+      { _id: req.params.id, user: userId },
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     )
 
     if (!log) {
-      return res.status(404).json({
-        message: "Learning log not found",
-      })
+      return res.status(404).json({ message: "Learning log not found" })
     }
 
     res.status(200).json({
@@ -833,7 +683,6 @@ const updateLearningLog = async (req, res) => {
   }
 }
 
-// DELETE LEARNING LOG
 const deleteLearningLog = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -844,14 +693,10 @@ const deleteLearningLog = async (req, res) => {
     })
 
     if (!log) {
-      return res.status(404).json({
-        message: "Learning log not found",
-      })
+      return res.status(404).json({ message: "Learning log not found" })
     }
 
-    res.status(200).json({
-      message: "Learning log deleted successfully",
-    })
+    res.status(200).json({ message: "Learning log deleted successfully" })
   } catch (error) {
     res.status(500).json({
       message: "Failed to delete learning log",
@@ -860,39 +705,28 @@ const deleteLearningLog = async (req, res) => {
   }
 }
 
-// AI STUDY COACH ANALYSIS
+// 9. AI STUDY COACH ANALYSIS (Optimized with Promise.all)
 const getAIStudyCoach = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const profile = await StudentProfile.findOne({
-      user: userId,
-    })
-
-    const exams = await ExamSchedule.find({
-      user: userId,
-    }).sort({ examDate: 1 })
-
-    const targets = await Target.find({
-      user: userId,
-    }).sort({ dueDate: 1 })
-
-    const checkpoints = await Checkpoint.find({
-      user: userId,
-    }).sort({ dueDate: 1 })
-
-    const timetable = await Timetable.find({
-      user: userId,
-      isActive: true,
-    }).sort({ startTime: 1 })
-
-    const skills = await SkillProgress.find({
-      user: userId,
-    }).sort({ currentLevel: 1 })
-
-    const learningLogs = await LearningLog.find({
-      user: userId,
-    }).sort({ date: -1 })
+    const [
+      profile,
+      exams,
+      targets,
+      checkpoints,
+      timetable,
+      skills,
+      learningLogs
+    ] = await Promise.all([
+      StudentProfile.findOne({ user: userId }).lean(),
+      ExamSchedule.find({ user: userId }).sort({ examDate: 1 }).lean(),
+      Target.find({ user: userId }).sort({ dueDate: 1 }).lean(),
+      Checkpoint.find({ user: userId }).sort({ dueDate: 1 }).lean(),
+      Timetable.find({ user: userId, isActive: true }).sort({ startTime: 1 }).lean(),
+      SkillProgress.find({ user: userId }).sort({ currentLevel: 1 }).lean(),
+      LearningLog.find({ user: userId }).sort({ date: -1 }).lean(),
+    ])
 
     const today = new Date()
 
@@ -915,8 +749,7 @@ const getAIStudyCoach = async (req, res) => {
     const recentLogs = learningLogs.slice(0, 7)
 
     const totalStudyMinutes = recentLogs.reduce(
-      (sum, log) =>
-        sum + Number(log.totalStudyMinutes || 0),
+      (sum, log) => sum + Number(log.totalStudyMinutes || 0),
       0
     )
 
@@ -924,8 +757,7 @@ const getAIStudyCoach = async (req, res) => {
       recentLogs.length > 0
         ? (
             recentLogs.reduce(
-              (sum, log) =>
-                sum + Number(log.focusLevel || 0),
+              (sum, log) => sum + Number(log.focusLevel || 0),
               0
             ) / recentLogs.length
           ).toFixed(1)
@@ -935,8 +767,7 @@ const getAIStudyCoach = async (req, res) => {
       recentLogs.length > 0
         ? Math.round(
             recentLogs.reduce(
-              (sum, log) =>
-                sum + Number(log.successRate || 0),
+              (sum, log) => sum + Number(log.successRate || 0),
               0
             ) / recentLogs.length
           )
@@ -947,8 +778,7 @@ const getAIStudyCoach = async (req, res) => {
     if (upcomingExams.length > 0) {
       const nearestExam = upcomingExams[0]
       const daysLeft = Math.ceil(
-        (new Date(nearestExam.examDate) - today) /
-          (1000 * 60 * 60 * 24)
+        (new Date(nearestExam.examDate) - today) / (1000 * 60 * 60 * 24)
       )
 
       recommendations.push({
@@ -1008,8 +838,7 @@ const getAIStudyCoach = async (req, res) => {
         pendingTargets: pendingTargets.length,
         pendingCheckpoints: pendingCheckpoints.length,
         weakSkills: weakSkills.length,
-        recentStudyHours:
-          Math.round((totalStudyMinutes / 60) * 10) / 10,
+        recentStudyHours: Math.round((totalStudyMinutes / 60) * 10) / 10,
         avgFocus,
         avgSuccess,
       },
@@ -1029,118 +858,81 @@ const getAIStudyCoach = async (req, res) => {
   }
 }
 
-
-// CREATE STUDENT DOCUMENT
+// 10. STUDENT DOCUMENT CONTROLLERS
 const createStudentDocument = async (req, res) => {
   try {
     const userId = getUserId(req)
-
     const file = req.file
 
-    let fileUrl = ""
-    let fileName = ""
-    let fileSize = 0
-
-    if (file) {
-      const publicId =
-        file.public_id ||
-        file.filename
-
-      const cloudName =
-        process.env.CLOUDINARY_CLOUD_NAME
-
-      fileUrl =
-        file.secure_url ||
-        file.url ||
-        (publicId && cloudName
-          ? `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`
-          : "")
-
-      fileName =
-        file.originalname || ""
-
-      fileSize =
-        file.size || 0
+    if (!file) {
+      return res.status(400).json({
+        message: "Document file is required",
+      })
     }
 
-    const document =
-      await StudentDocument.create({
-        user: userId,
+    const publicId = file.public_id || file.filename
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME
 
-        title: req.body.title,
+    const fileUrl =
+      file.secure_url ||
+      file.url ||
+      (publicId && cloudName
+        ? `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`
+        : "")
 
-        category:
-          req.body.category,
+    const fileName = file.originalname || ""
+    const fileSize = file.size || 0
 
-        documentType:
-          req.body.documentType,
+    let parsedTags = []
+    if (req.body.tags) {
+      try {
+        parsedTags = Array.isArray(req.body.tags)
+          ? req.body.tags
+          : JSON.parse(req.body.tags)
+      } catch (err) {
+        parsedTags = String(req.body.tags).split(",").map((t) => t.trim())
+      }
+    }
 
-        issuingAuthority:
-          req.body.issuingAuthority,
-
-        documentDate:
-          req.body.documentDate ||
-          null,
-
-        expiryDate:
-          req.body.expiryDate ||
-          null,
-
-        tags: req.body.tags
-          ? JSON.parse(
-              req.body.tags
-            )
-          : [],
-
-        isImportant:
-          req.body.isImportant ===
-          "true",
-
-        isVerified:
-          req.body.isVerified ===
-          "true",
-
-        notes: req.body.notes,
-
-        fileUrl,
-        fileName,
-        fileSize,
-      })
+    const document = await StudentDocument.create({
+      user: userId,
+      title: req.body.title || fileName,
+      category: req.body.category,
+      documentType: req.body.documentType,
+      issuingAuthority: req.body.issuingAuthority,
+      documentDate: req.body.documentDate || null,
+      expiryDate: req.body.expiryDate || null,
+      tags: parsedTags,
+      isImportant: req.body.isImportant === "true" || req.body.isImportant === true,
+      isVerified: req.body.isVerified === "true" || req.body.isVerified === true,
+      notes: req.body.notes,
+      fileUrl,
+      fileName,
+      fileSize,
+    })
 
     res.status(201).json({
-      message:
-        "Document uploaded successfully",
+      message: "Document uploaded successfully",
       document,
     })
   } catch (error) {
-    console.log(
-      "DOCUMENT UPLOAD ERROR:",
-      error
-    )
-
+    console.log("DOCUMENT UPLOAD ERROR:", error)
     res.status(500).json({
-      message:
-        "Failed to upload document",
+      message: "Failed to upload document",
       error: error.message,
     })
   }
 }
 
-// GET STUDENT DOCUMENTS
 const getStudentDocuments = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const documents = await StudentDocument.find({
-      user: userId,
-    }).sort({
-      isImportant: -1,
-      createdAt: -1,
-    })
+    const documents = await StudentDocument.find({ user: userId })
+      .sort({ isImportant: -1, createdAt: -1 })
+      .lean()
 
-    res.status(200).json({
-      documents,
-    })
+    res.status(200).json({ documents })
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch documents",
@@ -1149,27 +941,18 @@ const getStudentDocuments = async (req, res) => {
   }
 }
 
-// UPDATE STUDENT DOCUMENT
 const updateStudentDocument = async (req, res) => {
   try {
     const userId = getUserId(req)
 
     const document = await StudentDocument.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        user: userId,
-      },
+      { _id: req.params.id, user: userId },
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     )
 
     if (!document) {
-      return res.status(404).json({
-        message: "Document not found",
-      })
+      return res.status(404).json({ message: "Document not found" })
     }
 
     res.status(200).json({
@@ -1184,7 +967,6 @@ const updateStudentDocument = async (req, res) => {
   }
 }
 
-// DELETE STUDENT DOCUMENT
 const deleteStudentDocument = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -1195,14 +977,10 @@ const deleteStudentDocument = async (req, res) => {
     })
 
     if (!document) {
-      return res.status(404).json({
-        message: "Document not found",
-      })
+      return res.status(404).json({ message: "Document not found" })
     }
 
-    res.status(200).json({
-      message: "Document deleted successfully",
-    })
+    res.status(200).json({ message: "Document deleted successfully" })
   } catch (error) {
     res.status(500).json({
       message: "Failed to delete document",
@@ -1211,33 +989,39 @@ const deleteStudentDocument = async (req, res) => {
   }
 }
 
-
-// CREATE ACADEMIC NOTE
+// 11. ACADEMIC NOTE CONTROLLERS (MAPPED TO 'Note' MODEL)
 const createAcademicNote = async (req, res) => {
   try {
     const userId = getUserId(req)
 
+    if (!req.body.title) {
+      return res.status(400).json({ message: "Note title is required" })
+    }
+
+    let parsedTags = []
+    if (req.body.tags) {
+      try {
+        parsedTags = Array.isArray(req.body.tags)
+          ? req.body.tags
+          : JSON.parse(req.body.tags)
+      } catch (e) {
+        parsedTags = String(req.body.tags).split(",").map((t) => t.trim())
+      }
+    }
+
     const note = await Note.create({
       user: userId,
-
       title: req.body.title,
       content: req.body.content,
-
       subject: req.body.subject,
       chapter: req.body.chapter,
       noteType: req.body.noteType,
-
-      tags: req.body.tags || [],
-
+      tags: parsedTags,
       priority: req.body.priority || "Medium",
-      revisionStatus:
-        req.body.revisionStatus || "Not Revised",
-
-      isImportant:
-        req.body.isImportant || false,
-
+      revisionStatus: req.body.revisionStatus || "Not Revised",
+      isImportant: req.body.isImportant || false,
       folder: "Academic",
-      source: "Student Life",
+      createdBy: "Student Life",
       visibility: "all",
     })
 
@@ -1247,7 +1031,6 @@ const createAcademicNote = async (req, res) => {
     })
   } catch (error) {
     console.log(error)
-
     res.status(500).json({
       message: "Failed to create academic note",
       error: error.message,
@@ -1255,8 +1038,6 @@ const createAcademicNote = async (req, res) => {
   }
 }
 
-
-// GET ACADEMIC NOTES
 const getAcademicNotes = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -1264,17 +1045,13 @@ const getAcademicNotes = async (req, res) => {
     const notes = await Note.find({
       user: userId,
       folder: "Academic",
-    }).sort({
-      isImportant: -1,
-      updatedAt: -1,
     })
+      .sort({ isImportant: -1, updatedAt: -1 })
+      .lean()
 
-    res.status(200).json({
-      notes,
-    })
+    res.status(200).json({ notes })
   } catch (error) {
     console.log(error)
-
     res.status(500).json({
       message: "Failed to fetch academic notes",
       error: error.message,
@@ -1282,8 +1059,6 @@ const getAcademicNotes = async (req, res) => {
   }
 }
 
-
-// UPDATE ACADEMIC NOTE
 const updateAcademicNote = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -1295,16 +1070,11 @@ const updateAcademicNote = async (req, res) => {
         folder: "Academic",
       },
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     )
 
     if (!note) {
-      return res.status(404).json({
-        message: "Academic note not found",
-      })
+      return res.status(404).json({ message: "Academic note not found" })
     }
 
     res.status(200).json({
@@ -1313,7 +1083,6 @@ const updateAcademicNote = async (req, res) => {
     })
   } catch (error) {
     console.log(error)
-
     res.status(500).json({
       message: "Failed to update academic note",
       error: error.message,
@@ -1321,7 +1090,30 @@ const updateAcademicNote = async (req, res) => {
   }
 }
 
-// DAILY STUDY MAP
+const deleteAcademicNote = async (req, res) => {
+  try {
+    const userId = getUserId(req)
+
+    const note = await Note.findOneAndDelete({
+      _id: req.params.id,
+      user: userId,
+      folder: "Academic",
+    })
+
+    if (!note) {
+      return res.status(404).json({ message: "Academic note not found" })
+    }
+
+    res.status(200).json({ message: "Academic note deleted successfully" })
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete academic note",
+      error: error.message,
+    })
+  }
+}
+
+// 12. DAILY STUDY MAP (Optimized with Promise.all)
 const getDailyStudyMap = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -1329,90 +1121,47 @@ const getDailyStudyMap = async (req, res) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const profile = await StudentProfile.findOne({
-      user: userId,
-    })
-
-    const exams = await ExamSchedule.find({
-      user: userId,
-      examDate: {
-        $gte: today,
-      },
-    }).sort({
-      examDate: 1,
-    })
-
-    const targets = await Target.find({
-      user: userId,
-      status: {
-        $ne: "Completed",
-      },
-    }).sort({
-      dueDate: 1,
-      priority: -1,
-    })
-
-    const checkpoints = await Checkpoint.find({
-      user: userId,
-      status: {
-        $ne: "Completed",
-      },
-    })
-      .populate("target", "title category priority")
-      .sort({
-        dueDate: 1,
-        createdAt: -1,
-      })
-
-    const skills = await SkillProgress.find({
-      user: userId,
-    }).sort({
-      currentLevel: 1,
-    })
-
-    const timetable = await Timetable.find({
-      user: userId,
-      isActive: true,
-    }).sort({
-      startTime: 1,
-    })
-
-    const recentLogs = await LearningLog.find({
-      user: userId,
-    })
-      .sort({
-        date: -1,
-      })
-      .limit(7)
-
-    const academicNotes = await AcademicNote.find({
-      user: userId,
-      revisionStatus: {
-        $in: ["Not Revised", "Need Revision"],
-      },
-    })
-      .sort({
-        isImportant: -1,
-        updatedAt: -1,
-      })
-      .limit(5)
+    const [
+      profile,
+      exams,
+      targets,
+      checkpoints,
+      skills,
+      timetable,
+      recentLogs,
+      academicNotes
+    ] = await Promise.all([
+      StudentProfile.findOne({ user: userId }).lean(),
+      ExamSchedule.find({ user: userId, examDate: { $gte: today } }).sort({ examDate: 1 }).lean(),
+      Target.find({ user: userId, status: { $ne: "Completed" } }).sort({ dueDate: 1, priority: -1 }).lean(),
+      Checkpoint.find({ user: userId, status: { $ne: "Completed" } }).populate("target", "title category priority").sort({ dueDate: 1, createdAt: -1 }).lean(),
+      SkillProgress.find({ user: userId }).sort({ currentLevel: 1 }).lean(),
+      Timetable.find({ user: userId, isActive: true }).sort({ startTime: 1 }).lean(),
+      LearningLog.find({ user: userId }).sort({ date: -1 }).limit(7).lean(),
+      Note.find({ user: userId, folder: "Academic", revisionStatus: { $in: ["Not Revised", "Need Revision"] } }).sort({ isImportant: -1, updatedAt: -1 }).limit(5).lean()
+    ])
 
     const dailyPlan = []
     const urgentItems = []
     const improvementFocus = []
 
+    timetable.forEach((block) => {
+      dailyPlan.push({
+        type: "Timetable Block",
+        title: block.subject || block.title || "Scheduled Study",
+        subject: block.subject || "General",
+        priority: "Medium",
+        estimatedMinutes: block.durationMinutes || 60,
+        reason: `Scheduled block for ${block.day || "Today"}.`,
+      })
+    })
+
     exams.slice(0, 3).forEach((exam) => {
       const daysLeft = Math.ceil(
-        (new Date(exam.examDate) - today) /
-          (1000 * 60 * 60 * 24)
+        (new Date(exam.examDate) - today) / (1000 * 60 * 60 * 24)
       )
 
-      const urgency =
-        daysLeft <= 3
-          ? "High"
-          : daysLeft <= 7
-          ? "Medium"
-          : "Low"
+      const urgency = daysLeft <= 3 ? "High" : daysLeft <= 7 ? "Medium" : "Low"
 
       urgentItems.push({
         type: "Exam",
@@ -1482,8 +1231,7 @@ const getDailyStudyMap = async (req, res) => {
     })
 
     const totalStudyMinutes = recentLogs.reduce(
-      (sum, log) =>
-        sum + Number(log.totalStudyMinutes || 0),
+      (sum, log) => sum + Number(log.totalStudyMinutes || 0),
       0
     )
 
@@ -1491,8 +1239,7 @@ const getDailyStudyMap = async (req, res) => {
       recentLogs.length > 0
         ? (
             recentLogs.reduce(
-              (sum, log) =>
-                sum + Number(log.focusLevel || 0),
+              (sum, log) => sum + Number(log.focusLevel || 0),
               0
             ) / recentLogs.length
           ).toFixed(1)
@@ -1500,19 +1247,13 @@ const getDailyStudyMap = async (req, res) => {
 
     const todayPlan = dailyPlan
       .sort((a, b) => {
-        const score = {
-          High: 3,
-          Medium: 2,
-          Low: 1,
-        }
-
+        const score = { High: 3, Medium: 2, Low: 1 }
         return score[b.priority] - score[a.priority]
       })
       .slice(0, 8)
 
     const totalPlannedMinutes = todayPlan.reduce(
-      (sum, item) =>
-        sum + Number(item.estimatedMinutes || 0),
+      (sum, item) => sum + Number(item.estimatedMinutes || 0),
       0
     )
 
@@ -1521,8 +1262,7 @@ const getDailyStudyMap = async (req, res) => {
       summary: {
         totalTasks: todayPlan.length,
         totalPlannedMinutes,
-        recentStudyHours:
-          Math.round((totalStudyMinutes / 60) * 10) / 10,
+        recentStudyHours: Math.round((totalStudyMinutes / 60) * 10) / 10,
         avgFocus,
         urgentItems: urgentItems.length,
         improvementFocus: improvementFocus.length,
@@ -1544,8 +1284,7 @@ const getDailyStudyMap = async (req, res) => {
   }
 }
 
-
-// DAILY SUCCESS RATE
+// 13. DAILY SUCCESS RATE (Optimized with Promise.all)
 const getDailySuccessRate = async (req, res) => {
   try {
     const userId = getUserId(req)
@@ -1556,22 +1295,12 @@ const getDailySuccessRate = async (req, res) => {
     const tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
 
-    const checkpoints = await Checkpoint.find({
-      user: userId,
-    }).sort({ createdAt: -1 })
-
-    const targets = await Target.find({
-      user: userId,
-    }).sort({ dueDate: 1 })
-
-    const learningLogs = await LearningLog.find({
-      user: userId,
-    }).sort({ date: -1 })
-
-    const timetable = await Timetable.find({
-      user: userId,
-      isActive: true,
-    })
+    const [checkpoints, targets, learningLogs, timetable] = await Promise.all([
+      Checkpoint.find({ user: userId }).sort({ createdAt: -1 }).lean(),
+      Target.find({ user: userId }).sort({ dueDate: 1 }).lean(),
+      LearningLog.find({ user: userId }).sort({ date: -1 }).lean(),
+      Timetable.find({ user: userId, isActive: true }).lean(),
+    ])
 
     const todayLogs = learningLogs.filter((log) => {
       const date = new Date(log.date)
@@ -1603,9 +1332,10 @@ const getDailySuccessRate = async (req, res) => {
       0
     )
 
+    // Scaled to 240 mins (4 hrs)
     const studyScore = Math.min(
       100,
-      Math.round((todayStudyMinutes / 180) * 100)
+      Math.round((todayStudyMinutes / 240) * 100)
     )
 
     const todayLogSuccess =
@@ -1622,7 +1352,7 @@ const getDailySuccessRate = async (req, res) => {
 
     const timetableScore =
       activeTimetableBlocks > 0
-        ? Math.min(100, Math.round((todayStudyMinutes / 180) * 100))
+        ? Math.min(100, Math.round((todayStudyMinutes / 240) * 100))
         : 0
 
     const overallScore = Math.round(
@@ -1698,8 +1428,7 @@ const getDailySuccessRate = async (req, res) => {
         totalTargets: targets.length,
         completedTargets,
         todayStudyMinutes,
-        todayStudyHours:
-          Math.round((todayStudyMinutes / 60) * 10) / 10,
+        todayStudyHours: Math.round((todayStudyMinutes / 60) * 10) / 10,
         todayLogs: todayLogs.length,
         activeTimetableBlocks,
       },
@@ -1720,62 +1449,19 @@ const getDailySuccessRate = async (req, res) => {
   }
 }
 
-
-// DELETE ACADEMIC NOTE
-const deleteAcademicNote = async (req, res) => {
-  try {
-    const userId = getUserId(req)
-
-    const note = await AcademicNote.findOneAndDelete({
-      _id: req.params.id,
-      user: userId,
-    })
-
-    if (!note) {
-      return res.status(404).json({
-        message: "Academic note not found",
-      })
-    }
-
-    res.status(200).json({
-      message: "Academic note deleted successfully",
-    })
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to delete academic note",
-      error: error.message,
-    })
-  }
-}
-
-// STUDY IMPROVER
+// 14. STUDY IMPROVER (Optimized with Promise.all)
 const getStudyImprover = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const exams = await ExamSchedule.find({ user: userId }).sort({
-      examDate: 1,
-    })
-
-    const targets = await Target.find({ user: userId }).sort({
-      dueDate: 1,
-    })
-
-    const checkpoints = await Checkpoint.find({ user: userId }).sort({
-      createdAt: -1,
-    })
-
-    const skills = await SkillProgress.find({ user: userId }).sort({
-      currentLevel: 1,
-    })
-
-    const learningLogs = await LearningLog.find({ user: userId }).sort({
-      date: -1,
-    })
-
-    const notes = await AcademicNote.find({ user: userId }).sort({
-      updatedAt: -1,
-    })
+    const [exams, targets, checkpoints, skills, learningLogs, notes] = await Promise.all([
+      ExamSchedule.find({ user: userId }).sort({ examDate: 1 }).lean(),
+      Target.find({ user: userId }).sort({ dueDate: 1 }).lean(),
+      Checkpoint.find({ user: userId }).sort({ createdAt: -1 }).lean(),
+      SkillProgress.find({ user: userId }).sort({ currentLevel: 1 }).lean(),
+      LearningLog.find({ user: userId }).sort({ date: -1 }).lean(),
+      Note.find({ user: userId, folder: "Academic" }).sort({ updatedAt: -1 }).lean(),
+    ])
 
     const weakSubjectsMap = {}
 
@@ -1920,7 +1606,6 @@ const getStudyImprover = async (req, res) => {
   }
 }
 
-
 module.exports = {
   getStudentLifeDashboard,
   getStudentProfile,
@@ -1956,7 +1641,6 @@ module.exports = {
   updateLearningLog,
   deleteLearningLog,
 
-
   getAIStudyCoach,
 
   createStudentDocument,
@@ -1970,9 +1654,6 @@ module.exports = {
   deleteAcademicNote,
 
   getDailyStudyMap,
-
   getDailySuccessRate,
-
   getStudyImprover,
-
 }

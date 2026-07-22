@@ -1,8 +1,15 @@
 const axios = require("axios")
 
-// Replaced AcademicNote with the consolidated Note model
+// All Student Life OS Models
 const Note = require("../models/Note")
 const File = require("../models/File")
+const Target = require("../models/Target")
+const Checkpoint = require("../models/Checkpoint")
+const Exam = require("../models/Exam")
+const Timetable = require("../models/Timetable")
+const SkillProgress = require("../models/SkillProgress") // Updated Model Import
+const LearningLog = require("../models/LearningLog")
+const StudentProfile = require("../models/StudentProfile")
 
 const GEMINI_MODELS = [
   "gemini-2.0-flash-lite",
@@ -100,9 +107,9 @@ ${content}
   }
 }
 
-// MEMORY-BASED AI CHAT
+// MEMORY-BASED FULL STUDENT LIFE OS AI CHAT
 const chatWithAI = async (req, res) => {
-  console.log("🔥 NEW AI CONTROLLER RUNNING")
+  console.log("🔥 FULL STUDENT LIFE OS AI CONTROLLER RUNNING")
   try {
     const { message } = req.body
 
@@ -114,221 +121,243 @@ const chatWithAI = async (req, res) => {
 
     const userId = req.user?._id || req.user?.id
 
-    console.log("========== AI DEBUG ==========")
-    console.log("Logged User:", req.user)
-    console.log("User ID:", userId)
+    // ⚡ PARALLEL DATABASE FETCHING WITH SAFE EXECUTIONS
+    const [
+      profile,
+      targets,
+      checkpoints,
+      exams,
+      timetable,
+      skills,
+      learningLogs,
+      notes,
+      files,
+    ] = await Promise.all([
+      StudentProfile.findOne({ user: userId }).lean().catch(() => null),
+      Target.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean().catch(() => []),
+      Checkpoint.find({ user: userId }).sort({ createdAt: -1 }).limit(10).lean().catch(() => []),
+      Exam.find({ user: userId, examDate: { $gte: new Date() } }).sort({ examDate: 1 }).limit(10).lean().catch(() => []),
+      Timetable.find({ user: userId }).lean().catch(() => []),
+      SkillProgress.find({ user: userId }).lean().catch(() => []), // Updated Query
+      LearningLog.find({ user: userId }).sort({ date: -1 }).limit(10).lean().catch(() => []),
+      Note.find({ user: userId }).sort({ updatedAt: -1 }).limit(25).lean().catch(() => []),
+      File.find({ user: userId }).sort({ createdAt: -1 }).limit(5).lean().catch(() => []),
+    ])
 
-    const allNotes = await Note.find({})
-    console.log("Total Notes in Database:", allNotes.length)
-
-    const myNotes = await Note.find({ user: userId, folder: "Academic" })
-    console.log("My Academic Notes:", myNotes.length)
-
-    console.log("==============================")
-
-    let notesContext = ""
-    let notesCount = 0
-
-    let filesContext = ""
-    let filesCount = 0
-
-    // FETCH USER ACADEMIC NOTES FROM NOTE COLLECTION
-    try {
-      const notes = await Note.find({
-        user: userId,
-        folder: "Academic",
-      })
-        .sort({ updatedAt: -1 })
-        .limit(50)
-
-      notesCount = notes.length
-
-      if (notes.length > 0) {
-        notesContext = notes
-          .map(
-            (note, index) => `
-==============================
-ACADEMIC NOTE ${index + 1}
-
-Title:
-${note.title}
-
-Subject:
-${note.subject || "N/A"}
-
-Chapter:
-${note.chapter || "N/A"}
-
-Type:
-${note.noteType || "Standard"}
-
-Priority:
-${note.priority || "Normal"}
-
-Revision Status:
-${note.revisionStatus || "N/A"}
-
-Important:
-${note.isImportant ? "Yes" : "No"}
-
-Tags:
-${note.tags?.length ? note.tags.join(", ") : "None"}
-
-Content:
-${note.content}
-
-AI Summary:
-${note.aiSummary || "No summary available"}
-
-Created:
-${note.createdAt}
-
-==============================
+    // 1. STUDENT PROFILE CONTEXT
+    const profileContext = profile
+      ? `
+Name: ${profile.fullName || "Student"}
+College: ${profile.collegeName || "N/A"}
+Course: ${profile.courseName || "N/A"}
+Semester: ${profile.currentSemester || "N/A"}
+Academic Year: ${profile.academicYear || "N/A"}
+Career Goal: ${profile.careerGoal || "N/A"}
+Target Role: ${profile.targetRole || "N/A"}
+Preferred Study Time: ${profile.preferredStudyTime || "Flexible"}
+Daily Capacity: ${profile.dailyStudyCapacityHours || 0} Hours
+Strong Areas: ${(profile.strongAreas || []).join(", ")}
+Weak Areas: ${(profile.weakAreas || []).join(", ")}
+Skills: ${(profile.currentSkills || []).join(", ")}
 `
+      : "No profile found."
+
+    // 2. TARGETS CONTEXT
+    const targetsContext = targets.length
+      ? targets
+          .map(
+            (t) =>
+              `- ${t.title}
+Status: ${t.status || "Pending"}
+Progress: ${t.progress || 0}%
+Priority: ${t.priority || "Normal"}
+Due: ${t.dueDate ? new Date(t.dueDate).toDateString() : "N/A"}`
           )
           .join("\n\n")
-      } else {
-        notesContext = "No Academic Notes found."
-      }
-    } catch (noteError) {
-      console.log(
-        "ACADEMIC NOTES FETCH ERROR:",
-        noteError.message
-      )
+      : "No Targets"
 
-      notesContext = "Could not fetch Academic Notes."
-    }
-
-    // FETCH USER UPLOADED FILES
-    try {
-      const files = await File.find({
-        user: userId,
-      })
-        .sort({ createdAt: -1 })
-        .limit(10)
-
-      filesCount = files.length
-
-      if (files.length > 0) {
-        filesContext = files
-          .map((file, index) => {
-            return `
-File ${index + 1}
-File Name: ${file.originalName}
-File Type: ${file.mimeType}
-Uploaded At: ${file.createdAt}
-Extracted Text:
-${
-  file.extractedText
-    ? file.extractedText.slice(0, 5000)
-    : "No extracted text available."
-}
-`
-          })
+    // 3. CHECKPOINTS CONTEXT
+    const checkpointsContext = checkpoints.length
+      ? checkpoints
+          .map(
+            (c) =>
+              `- [${c.completed ? "Completed" : "Pending"}] ${c.title} (Target: ${c.targetTitle || "General"})`
+          )
           .join("\n")
-      } else {
-        filesContext = "No uploaded files found."
-      }
-    } catch (fileError) {
-      console.log(
-        "FILES FETCH ERROR:",
-        fileError.message
-      )
+      : "No active checkpoints."
 
-      filesContext = "Could not fetch uploaded files."
-    }
+    // 4. UPCOMING EXAMS CONTEXT
+    const examsContext = exams.length
+      ? exams
+          .map(
+            (e) =>
+              `- ${e.subject || e.title}: ${e.examDate ? new Date(e.examDate).toDateString() : "TBD"} (Syllabus Covered: ${e.progress || 0}%)`
+          )
+          .join("\n")
+      : "No upcoming exams scheduled."
 
+    // 5. TIMETABLE CONTEXT
+    const timetableContext = timetable.length
+      ? timetable
+          .map(
+            (t) =>
+              `- ${t.day || "Day"}: ${t.subject || t.title || t.activity || "Activity"} (${t.startTime || "N/A"} - ${t.endTime || "N/A"})`
+          )
+          .join("\n")
+      : "No timetable."
+
+    // 6. SKILLS CONTEXT
+    const skillsContext = skills.length
+      ? skills
+          .map(
+            (s) =>
+              `${s.skillName || "Skill"}
+Level: ${s.currentLevel || 0}%
+Target: ${s.targetLevel || 0}%
+Confidence: ${s.confidenceLevel || 0}/5`
+          )
+          .join("\n\n")
+      : "No Skills"
+
+    // 7. LEARNING LOGS CONTEXT
+    const logsContext = learningLogs.length
+      ? learningLogs
+          .map(
+            (l) =>
+              `Date: ${l.date ? new Date(l.date).toDateString() : "Recent"}
+Study Time: ${l.totalStudyMinutes || 0} mins
+Success: ${l.successRate || 0}%
+Note: ${l.productivityNote || "None"}`
+          )
+          .join("\n\n")
+      : "No Learning Logs"
+
+    // 8. NOTES CONTEXT (Truncated to 700 chars for optimal payload performance)
+    const notesContext = notes.length
+      ? notes
+          .map(
+            (n, i) =>
+              `[Note ${i + 1}] Title: ${n.title} | Subject: ${n.subject || "General"} | Folder: ${n.folder || "Default"}\nContent: ${n.content ? n.content.slice(0, 700) : "No content"}...`
+          )
+          .join("\n\n")
+      : "No notes found."
+
+    // 9. FILES CONTEXT (Truncated to 1000 chars)
+    const filesContext = files.length
+      ? files
+          .map(
+            (f, i) =>
+              `[File ${i + 1}] Name: ${f.originalName}\nExtracted Text: ${f.extractedText ? f.extractedText.slice(0, 1000) : "N/A"}`
+          )
+          .join("\n\n")
+      : "No uploaded files found."
+
+    // MASTER PROMPT FOR SECONDBRAIN AI
     const prompt = `
-You are SecondBrain AI, an intelligent study and productivity assistant.
+You are SecondBrain AI — an intelligent, context-aware study coach and productivity assistant built into Student Life OS.
 
-You have access to:
-
-1. Academic Notes (folder = Academic)
-2. Uploaded Files
-3. User Question
+Below is the complete live context of the user's academic and learning profile:
 
 ----------------------------------------------------
-IMPORTANT RULES
+1. STUDENT PROFILE
 ----------------------------------------------------
-
-Academic Notes (folder = Academic) are the PRIMARY source.
-
-If the answer exists inside Academic Notes,
-answer ONLY using those notes.
-
-Begin the answer with:
-
-"📚 Based on your Academic Notes..."
-
-If the answer exists inside uploaded files,
-
-Begin with:
-
-"📄 Based on your uploaded files..."
-
-If information exists in both,
-combine both.
-
-If nothing exists,
-
-Say:
-
-"I couldn't find this information inside your Academic Notes or uploaded files."
-
-Then provide general knowledge.
-
-Never pretend information exists.
-
-Never hallucinate.
+${profileContext}
 
 ----------------------------------------------------
-ACADEMIC NOTES
+2. ACTIVE TARGETS
 ----------------------------------------------------
+${targetsContext}
 
+----------------------------------------------------
+3. CHECKPOINTS
+----------------------------------------------------
+${checkpointsContext}
+
+----------------------------------------------------
+4. UPCOMING EXAMS
+----------------------------------------------------
+${examsContext}
+
+----------------------------------------------------
+5. TIMETABLE
+----------------------------------------------------
+${timetableContext}
+
+----------------------------------------------------
+6. SKILLS
+----------------------------------------------------
+${skillsContext}
+
+----------------------------------------------------
+7. RECENT LEARNING LOGS
+----------------------------------------------------
+${logsContext}
+
+----------------------------------------------------
+8. NOTES (Academic & General)
+----------------------------------------------------
 ${notesContext}
 
 ----------------------------------------------------
-UPLOADED FILES
+9. UPLOADED FILES & DOCUMENTS
 ----------------------------------------------------
-
 ${filesContext}
 
 ----------------------------------------------------
-USER QUESTION
+USER QUESTION / QUERY
 ----------------------------------------------------
-
 ${message}
 
 ----------------------------------------------------
-RESPONSE STYLE
+RESPONSE GUIDELINES & SPECIFIC INTENT RULES
+----------------------------------------------------
+• Priority Order: User Notes/Files > Academic Schedule/Exams > General Student OS Context > General Knowledge.
+• Tone: Helpful, structured, encouraging study coach.
+• Language: Clean Hinglish unless requested otherwise.
+• If answering from Notes/Files, clearly state: "📚 Based on your notes..." or "📄 Based on your files...".
+
+----------------------------------------------------
+CUSTOM QUERY INTENT HANDLERS:
 ----------------------------------------------------
 
-• Answer in Hinglish unless the user asks another language.
-• Explain simply.
-• Use bullet points.
-• Use examples whenever possible.
-• If the user asks to explain notes,
-explain every point one by one.
-• If the user asks for revision,
-create revision notes.
-• If the user asks for interview preparation,
-convert notes into interview questions.
-• If the user asks for MCQs,
-generate MCQs from Academic Notes.
-• If the user asks for flashcards,
-generate flashcards from Academic Notes.
+1. If user asks: "What should I study today?"
+   Prioritize in this order:
+   i. Upcoming exams
+   ii. Pending checkpoints
+   iii. Pending targets
+   iv. Weak areas from Student Profile & Skills
+   v. Timetable
+   And generate today's actionable study plan.
 
-Remember:
+2. If user asks: "How am I doing?"
+   Analyze:
+   • Skills Progress & Confidence
+   • Learning Logs (Study time, Focus level, Success rate)
+   • Active Targets & Progress
+   • Checkpoints
+   • Notes
+   • Student Profile
+   Then provide strengths, weaknesses, and a concrete next action plan.
 
-Academic Notes > Uploaded Files > General Knowledge.
+3. If user asks career-related questions:
+   Personalize advice using:
+   • Career Goal
+   • Target Role
+   • Current Skills
+   • Weak Areas
+   • Strong Areas
 `
 
     const reply = await callGemini(prompt)
 
     res.status(200).json({
       reply,
-      notesUsed: notesCount,
-      filesUsed: filesCount,
+      contextDataUsed: {
+        targetsCount: targets.length,
+        examsCount: exams.length,
+        notesUsed: notes.length,
+        filesUsed: files.length,
+      },
     })
   } catch (error) {
     console.log(
