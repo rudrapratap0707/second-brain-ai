@@ -359,6 +359,8 @@ export const getAcademicNotes = async () => {
     "/student-life/academic-notes"
   )
 
+  console.log(response.data)
+
   return response.data
 }
 

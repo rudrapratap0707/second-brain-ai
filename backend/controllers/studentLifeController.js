@@ -7,7 +7,7 @@ const Checkpoint = require("../models/Checkpoint")
 const SkillProgress = require("../models/SkillProgress")
 const LearningLog = require("../models/LearningLog")
 
-const AcademicNote = require("../models/AcademicNote")
+const Note = require("../models/Note")
 
 const StudentDocument = require("../models/StudentDocument")
 const getUserId = (req) => {
@@ -1215,25 +1215,38 @@ const deleteStudentDocument = async (req, res) => {
 // CREATE ACADEMIC NOTE
 const createAcademicNote = async (req, res) => {
   try {
-    console.log("===== CREATE NOTE API HIT =====")
-    console.log("BODY:", req.body)
-
     const userId = getUserId(req)
-    console.log("USER ID:", userId)
 
-    const note = await AcademicNote.create({
+    const note = await Note.create({
       user: userId,
-      ...req.body,
-    })
 
-    console.log("NOTE CREATED:", note)
+      title: req.body.title,
+      content: req.body.content,
+
+      subject: req.body.subject,
+      chapter: req.body.chapter,
+      noteType: req.body.noteType,
+
+      tags: req.body.tags || [],
+
+      priority: req.body.priority || "Medium",
+      revisionStatus:
+        req.body.revisionStatus || "Not Revised",
+
+      isImportant:
+        req.body.isImportant || false,
+
+      folder: "Academic",
+      source: "Student Life",
+      visibility: "all",
+    })
 
     res.status(201).json({
       message: "Academic note created successfully",
       note,
     })
   } catch (error) {
-    console.log("CREATE NOTE ERROR:", error)
+    console.log(error)
 
     res.status(500).json({
       message: "Failed to create academic note",
@@ -1241,13 +1254,16 @@ const createAcademicNote = async (req, res) => {
     })
   }
 }
+
+
 // GET ACADEMIC NOTES
 const getAcademicNotes = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const notes = await AcademicNote.find({
+    const notes = await Note.find({
       user: userId,
+      folder: "Academic",
     }).sort({
       isImportant: -1,
       updatedAt: -1,
@@ -1257,6 +1273,8 @@ const getAcademicNotes = async (req, res) => {
       notes,
     })
   } catch (error) {
+    console.log(error)
+
     res.status(500).json({
       message: "Failed to fetch academic notes",
       error: error.message,
@@ -1264,15 +1282,17 @@ const getAcademicNotes = async (req, res) => {
   }
 }
 
+
 // UPDATE ACADEMIC NOTE
 const updateAcademicNote = async (req, res) => {
   try {
     const userId = getUserId(req)
 
-    const note = await AcademicNote.findOneAndUpdate(
+    const note = await Note.findOneAndUpdate(
       {
         _id: req.params.id,
         user: userId,
+        folder: "Academic",
       },
       req.body,
       {
@@ -1292,6 +1312,8 @@ const updateAcademicNote = async (req, res) => {
       note,
     })
   } catch (error) {
+    console.log(error)
+
     res.status(500).json({
       message: "Failed to update academic note",
       error: error.message,

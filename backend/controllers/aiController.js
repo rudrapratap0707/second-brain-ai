@@ -1,6 +1,7 @@
 const axios = require("axios")
 
-const AcademicNote = require("../models/AcademicNote")
+// Replaced AcademicNote with the consolidated Note model
+const Note = require("../models/Note")
 const File = require("../models/File")
 
 const GEMINI_MODELS = [
@@ -101,7 +102,7 @@ ${content}
 
 // MEMORY-BASED AI CHAT
 const chatWithAI = async (req, res) => {
-  console.log("🔥 NEW AI CONTROLLER RUNNING");
+  console.log("🔥 NEW AI CONTROLLER RUNNING")
   try {
     const { message } = req.body
 
@@ -113,16 +114,29 @@ const chatWithAI = async (req, res) => {
 
     const userId = req.user?._id || req.user?.id
 
+    console.log("========== AI DEBUG ==========")
+    console.log("Logged User:", req.user)
+    console.log("User ID:", userId)
+
+    const allNotes = await Note.find({})
+    console.log("Total Notes in Database:", allNotes.length)
+
+    const myNotes = await Note.find({ user: userId, folder: "Academic" })
+    console.log("My Academic Notes:", myNotes.length)
+
+    console.log("==============================")
+
     let notesContext = ""
     let notesCount = 0
 
     let filesContext = ""
     let filesCount = 0
 
-    // FETCH USER ACADEMIC NOTES (Student Life OS)
+    // FETCH USER ACADEMIC NOTES FROM NOTE COLLECTION
     try {
-      const notes = await AcademicNote.find({
+      const notes = await Note.find({
         user: userId,
+        folder: "Academic",
       })
         .sort({ updatedAt: -1 })
         .limit(50)
@@ -140,19 +154,19 @@ Title:
 ${note.title}
 
 Subject:
-${note.subject}
+${note.subject || "N/A"}
 
 Chapter:
 ${note.chapter || "N/A"}
 
 Type:
-${note.noteType}
+${note.noteType || "Standard"}
 
 Priority:
-${note.priority}
+${note.priority || "Normal"}
 
 Revision Status:
-${note.revisionStatus}
+${note.revisionStatus || "N/A"}
 
 Important:
 ${note.isImportant ? "Yes" : "No"}
@@ -229,7 +243,7 @@ You are SecondBrain AI, an intelligent study and productivity assistant.
 
 You have access to:
 
-1. Academic Notes (Student Life OS)
+1. Academic Notes (folder = Academic)
 2. Uploaded Files
 3. User Question
 
@@ -237,7 +251,7 @@ You have access to:
 IMPORTANT RULES
 ----------------------------------------------------
 
-Academic Notes are the PRIMARY source.
+Academic Notes (folder = Academic) are the PRIMARY source.
 
 If the answer exists inside Academic Notes,
 answer ONLY using those notes.
